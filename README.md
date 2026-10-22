@@ -1,6 +1,6 @@
 # GHOST CTS-4 — CODE TO SURVIVE
 
-**Created by Hailstones (@iamhailstones)**
+**Created by Hailstones**
 
 Welcome to **GHOST CTS-4**, a dark, action-packed browser game where survival meets intelligence.
 
@@ -20,26 +20,22 @@ But this is more than a shooter. Python is part of your survival. Solve challeng
 
 - Dark, cinematic atmosphere
 - Action-packed missions and enemy encounters
-- Multiple weapons inspired by Python concepts
+- Weapons inspired by Python concepts
 - Python challenges woven into gameplay
-- AI-powered assistance through the connected game service
+- AI-powered assistance
 - Voice features and mobile-friendly controls
 
 **Your code. Your survival. Your mission.**
 
 ## Follow Hailstones
 
-- **X (Twitter):** [@iamhailstones](https://x.com/iamhailstones)
-- **Instagram:** [@iamhailstones](https://www.instagram.com/iamhailstones)
+- **X (Twitter):** [@iamhailstones](https://x.com/iamhailstones) · [@GHOST_CTS_4](https://x.com/GHOST_CTS_4)
+- **YouTube:** [iamhailstones](https://www.youtube.com/@iamhailstones) · [GHOSTCTS4](https://www.youtube.com/@GHOSTCTS4)
 - **TikTok:** [@iamhailstones](https://www.tiktok.com/@iamhailstones)
-- **CodePen:** [Iamhailstones](https://codepen.io/Iamhailstones)
-- **Email:** [iamhailstones@gmail.com](mailto:iamhailstones@gmail.com)
 
 ## Play GHOST CTS-4
 
-The official game link will be announced when the public release is ready.
-
-Follow Hailstones for updates, announcements, and future projects.
+Follow Hailstones for the official release, updates, and announcements.
 
 ---
 
