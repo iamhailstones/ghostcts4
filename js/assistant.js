@@ -9,7 +9,7 @@ const KB=[
  {id:'hello',k:['hello','hi','hey','who are you','what are you','what can you do','help me','introduce'],a:"Hi python soldier, I'm the GHOST CTS-4 soldier assistant. I can explain the controls, weapons, missions, scoring, Practice Mode and Python ideas. I work from the game's own notes, so I stay accurate. Try: 'How do I reload?'"},
  {id:'thanks',k:['thanks','thank you','cheers'],a:"Any time. Stay sharp out there."},
  {id:'welcome',k:['hello','hi','hey'],a:"Hello! How are you doing today? How can I help you with GHOST CTS-4?"},
- {id:'how_are_you',k:['how are you','how are you doing','how is it going'],a:"I'm doing well, thank you for asking! How can I help you today?"},
+ {id:'how_are_you',k:['how you doing','how ya doing','how you doin','how ya doin','how are you doing','how are you','how r u','how r ya','hru','hr u','sup','wassup','whats up','what up','wsg','wyd','howdy','how yall doing','how yall doin','how y’all doing','how y’all doin','how u doing','how u doin','u good','you good','you doin good','howzit','how things going','how things goin','how you been','how ya been','how u been','hows it going','how is it going','how it going','how it goin','how you feelin','how ya feelin'],a:"I'm fine, thank you! How can I help you today?"},
  {id:'morning',k:['good morning'],a:"Good morning! Welcome to GHOST CTS-4. How can I help you today?"},
  {id:'afternoon',k:['good afternoon'],a:"Good afternoon! Welcome to GHOST CTS-4. How can I help you today?"},
  {id:'evening',k:['good evening'],a:"Good evening! Welcome to GHOST CTS-4. How can I help you today?"},
