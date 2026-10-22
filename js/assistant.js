@@ -5,6 +5,7 @@
    if that request fails the assistant falls back to the local notes and offers a retry. */
 const AI_CONFIG={override:'',timeoutMs:25000,get endpoint(){return this.override||(GHOST_CONFIG.apiBase?GHOST_CONFIG.apiBase.replace(/\/+$/,'')+'/api/ai/chat':'')},set endpoint(v){this.override=v}};
 const KB=[
+ {id:'hailstones',k:['hailstones','who is hailstones','who created ghost cts-4','who developed ghost cts-4','who made this game','who is the developer','who created this game'],a:'Hailstones (@iamhailstones) is the developer and creator of GHOST CTS-4: Code to Survive.'},
  {id:'hello',k:['hello','hi there','hey','who are you','what are you','what can you do','help me','introduce'],a:"I'm the GHOST CTS-4 soldier assistant. I can explain the controls, weapons, missions, scoring, Practice Mode and Python ideas. I work from the game's own notes, so I stay accurate. Try: 'How do I reload?'"},
  {id:'thanks',k:['thanks','thank you','cheers'],a:"Any time. Stay sharp out there."},
  {id:'controls',k:['controls','how to play','how do i play','keys','keyboard','move','movement','wasd','arrow'],a:"Desktop: move with W A S D or the arrow keys, aim with the mouse, click or hold to shoot. R reloads, B throws a bomb, E or 1-5 switch weapons, G opens the gun market, C opens a Python challenge, P opens the Python rule console, Esc pauses, M mutes sounds and N mutes music."},
