@@ -1,0 +1,60 @@
+# ===== GHOST CTS-4 : public repository protection =====
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Private AI backend. It has its own private repository / hosting; never publish it from the public GitHub Pages repo.
+# (It holds no secrets itself: keys are read from environment variables. Remove this line only if you deliberately want the backend source public.)
+backend/
+# If a backend/ was committed before, stop tracking it WITHOUT deleting your local files:
+#   git rm -r --cached backend
+# Private backend configuration
+backend/.env
+backend/.env.*
+server/.env
+server/.env.*
+
+# Secret and credential files
+secrets/
+credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Service account credentials
+service-account*.json
+credentials*.json
+
+# Local configuration
+config.local.*
+*.local
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+logs/
+
+# Local databases and private data
+*.sqlite
+*.sqlite3
+*.db
+
+# Dependencies and build artifacts
+node_modules/
+dist/
+build/
+*.zip
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# NOT ignored on purpose (needed by the game / GitHub Pages): index.html, css/, js/ (including js/config.js), assets/, manifest.json, sw.js, tests/, scripts/, .env.example
