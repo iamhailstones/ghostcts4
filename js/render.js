@@ -1,3 +1,4 @@
+
 "use strict";
 /* render.js - all canvas drawing: gritty tactical top-down look, dynamic lighting, tracers, and a military-style HUD */
 /* visibility: characters and guns are drawn ~20% larger (30% on phones); the HUD blocks scale from their own corner, so the layout stays the same */
@@ -130,3 +131,24 @@ function hudCanvas(p){x.textBaseline='alphabetic';const hs=HSCALE();
  for(const e of G.enemies){let dx=(e.x-p.x)*s,dy=(e.y-p.y)*s;const d=Math.hypot(dx,dy);if(d>R-4){dx*=(R-4)/d;dy*=(R-4)/d}circ(mx+dx,my+dy,e.boss?4:2.6,'#ff4040')}
  x.translate(mx,my);x.rotate(p.a);x.fillStyle='#6cf08a';x.beginPath();x.moveTo(7,0);x.lineTo(-5,-4.5);x.lineTo(-5,4.5);x.closePath();x.fill();x.restore();
  x.strokeStyle='rgba(180,220,190,.6)';x.lineWidth=2;x.beginPath();x.arc(mx,my,R,0,6.283);x.stroke();x.restore()}
+/* backgrounds.js - GHOST CTS 4: a different floor + obstacle look for all 10 sectors. Load it right AFTER js/render.js.
+   It only replaces floorFor() (the cached floor picture) and crate() (the obstacle drawing). Gameplay, collisions, HUD, lighting
+   and the minimap are untouched.
+     1 water + rock obstacles          2 white tile floor + stone blocks     3 desert + wooden sandboxes
+     4 red-lit room + black doors      5 road + garden-bed obstacles         6 frozen ice field + ice blocks
+     7 silver metal plating + steel blocks   8 forest floor + tree canopies   9 deep space + asteroids   10 sky above the clouds + storm clouds */
+const BGX=(()=>{
+ const sr=seed=>{let s=(seed|0)||1;return()=>{s=(Math.imul(s,1664525)+1013904223)|0;return(s>>>0)/4294967296}};
+ const PAD=16,OBC=new Map(),KIND={1:'rock',2:'stone',3:'sandbox',4:'door',5:'garden',6:'ice',7:'steel',8:'tree',9:'asteroid',10:'storm'};
+ /* ---------- floors (drawn once per level into a cached canvas) ---------- */
+ const FLOOR={
+  1(g){const gr=g.createLinearGradient(0,0,W,H);gr.addColorStop(0,'#0e5f86');gr.addColorStop(.5,'#0b4d74');gr.addColorStop(1,'#08385c');g.fillStyle=gr;g.fillRect(0,0,W,H);
+   for(let i=0;i<26;i++){const px=rnd(0,W),py=rnd(0,H),R=rnd(60,160),q=g.createRadialGradient(px,py,0,px,py,R);q.addColorStop(0,Math.random()<.5?'rgba(120,210,235,.16)':'rgba(2,20,40,.22)');q.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=q;g.fillRect(px-R,py-R,R*2,R*2)}
+   g.lineCap='round';for(let i=0;i<130;i++){const px=rnd(0,W),py=rnd(0,H),w=rnd(30,110),ph=rnd(0,6);g.strokeStyle='rgba(190,235,255,'+rnd(.06,.2)+')';g.lineWidth=rnd(1,2.4);g.beginPath();for(let k=0;k<=w;k+=5){const yy=py+Math.sin(k*.14+ph)*3.5;k?g.lineTo(px+k,yy):g.moveTo(px,yy)}g.stroke()}
+   for(let i=0;i<70;i++){g.fillStyle='rgba(255,255,255,'+rnd(.05,.22)+')';g.fillRect(rnd(0,W),rnd(0,H),rnd(1,3),rnd(1,2))}},
+  2(g){g.fillStyle='#e8e7e1';g.fillRect(0,0,W,H);const T=75;
+   for(let ty=0;ty<H;ty+=T)for(let tx=0;tx<W;tx+=T){g.fillStyle=Math.random()<.5?'rgba(0,0,0,'+rnd(0,.045)+')':'rgba(255,255,255,'+rnd(0,.25)+')';g.fillRect(tx,ty,T,T)}
+   g.lineWidth=2;for(let i=0;i<=W;i+=T){g.strokeStyle='rgba(95,100,112,.4)';g.beginPath();g.moveTo(i,0);g.lineTo(i,H);g.stroke();g.strokeStyle='rgba(255,255,255,.8)';g.beginPath();g.moveTo(i+2,0);g.lineTo(i+2,H);g.stroke()}
+   for(let i=0;i<=H;i+=T){g.strokeStyle='rgba(95,100,112,.4)';g.beginPath();g.moveTo(0,i);g.lineTo(W,i);g.stroke();g.strokeStyle='rgba(255,255,255,.8)';g.beginPath();g.moveTo(0,i+2);g.lineTo(W,i+2);g.stroke()}
+   for(let i=0;i<260;i++){g.fillStyle='rgba(60,65,75,'+rnd(.03,.1)+')';g.fillRect(rnd(0,W),rnd(0,H),rnd(1,3),rnd(1,2))}
+   for(let i=0;i<6;i++){const sx=rnd(0,W),sy=rnd(0,H),gr=g.createRadialGradient(sx,sy,0,sx,sy,rnd(50,110));gr.addColorStop(0,'rgba(120,1
