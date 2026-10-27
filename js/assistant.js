@@ -7,6 +7,8 @@ const AI_CONFIG={override:'',timeoutMs:25000,get endpoint(){return this.override
 const KB = [
 {id:'creator',k:['hailstones','who is hailstones','who is iam hailstones','who is iamhailstones','who created ghost cts-4','who created ghost cts4','who created ghostcts4','who created ghost cts 4','who created ghost cts 3','who created ghost cts3','who developed ghost cts4','who developed ghost cts 4','who made this game','who made ghost','who made ghost cts4','who built ghost','who is the developer','who is the creator','who owns ghost cts4','game creator','game developer','creator of ghost','developer of ghost'],a:'Hailstones (@iamhailstones) is the developer and creator of GHOST CTS-4: Code to Survive, and GHOST CTS-3.'},
 
+{id: 'workings', k:['how does this game works', 'tell me about the game'], a: 'It is a Python Combat Simulator that teaches python using combat tools integrated with python syntaxes'},
+
 {id:'hello',k:['hello','hi','hey','heyy','heyyy','helo','hii','hiii','hiya','yo','yoo','sup','wassup','whats up','what is up','what up','wsg','howdy','good day','hey bro','hi bro','hello bro','yo bro','sup bro'],a:"Hi, Python soldier! I'm the GHOST CTS-4 AI Game Assistant. I can explain the controls, weapons, missions, scoring, Practice Mode and Python concepts. What do you need help with?"},
 
 {id:'identity',k:['who are you','who r u','what are you','what are u','your name','whats your name','what is your name','whats ur name','are you ai','are u ai','are you a bot','are u a bot','are you human','are u human','who am i talking to'],a:"I'm the GHOST CTS-4 AI Game Assistant. I'm here to help you understand the game, its weapons, controls, missions and Python challenges."},
