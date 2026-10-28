@@ -1,5 +1,5 @@
 "use strict";
-/* boot.js - cinematic loading screen: embers (no smoke: the background stays pure black), timed title reveal, blinking eyes,
+/* boot.js - cinematic loading screen: light low smoke rising from beneath (kept small for phones), timed title reveal, blinking eyes,
    real initialization progress, error + retry, and the shared GHOST / CODE TO SURVIVE / CTS4 title lockup. */
 const TITLE_HTML='<div class="logo" role="heading" aria-level="1" aria-label="GHOST: Code to Survive, CTS4"><span>GH</span>'+
  '<svg class="gmask" viewBox="0 0 60 80" aria-hidden="true"><ellipse class="oring" cx="30" cy="40" rx="22" ry="33"/>'+
@@ -48,20 +48,21 @@ const Boot={
  deploy(){if(!this.ready||!this.cinema||!this.active)return;this.active=false;Music.start();Voice.event('welcome');setTimeout(()=>{if(!SAVE.tutDone&&state==='menu')Tut.open()},1100);if(Orient.mobile)Orient.request();$('boot').classList.add('out');
   setTimeout(()=>{$('boot').style.display='none';cancelAnimationFrame(this.raf)},950)},
  onKey(e){if((e.key==='Enter'||e.key===' ')&&$('bootGo').classList.contains('on')){e.preventDefault();this.deploy()}},
- /* ----- smoke and embers (capped counts, lower on phones) ----- */
+ /* ----- low ground smoke: only a few soft puffs rising from the bottom edge and fading out by mid-screen (fewer + smaller on phones) ----- */
  fxInit(){const c=$('bootFx');this.cx=c.getContext('2d');
   const rs=()=>{this.d=Math.min(devicePixelRatio||1,1.5)*(this.EW()<700?.75:1);c.width=this.EW()*this.d;c.height=this.EH()*this.d};rs();addEventListener('resize',rs);
-  this.smoke=[]},
- mkSmoke(){return{x:Math.random()*this.EW(),y:this.EH()*(.3+Math.random()*.8),r:150+Math.random()*200,vx:(Math.random()-.3)*14,vy:-(4+Math.random()*10),a:.03+Math.random()*.05}},
+  const mob=this.EW()<700;this.smoke=Array.from({length:mob?4:7},()=>this.mkSmoke(true))},
+ mkSmoke(init){const mob=this.EW()<700,H=this.EH();return{x:Math.random()*this.EW(),y:H*(init?.82+Math.random()*.3:1.02+Math.random()*.12),r:(mob?90:130)+Math.random()*(mob?70:110),vx:(Math.random()-.5)*10,vy:-(6+Math.random()*8),a:.025+Math.random()*.035}},
  loop(){this.raf=requestAnimationFrame(()=>this.loop());
   this.shown+=(this.target-this.shown)*.08;const pct=Math.min(100,Math.round(this.shown*100+.4));
   $('bootBar').style.width=pct+'%';$('bootPct').textContent=pct+'%';this.draw()},
  draw(){const x=this.cx,W=this.EW(),H=this.EH(),m=this.RM?0:1,dt=.016,now=performance.now();
   x.setTransform(this.d,0,0,this.d,0,0);x.clearRect(0,0,W,H);
   const thick=this.cinema?.7:1.1-Math.min(.4,(now-this.t0)/6000);       // smoke starts dense, then thins out
-  for(const s of this.smoke){s.x+=s.vx*dt*m;s.y+=s.vy*dt*m;if(s.y<-s.r)Object.assign(s,this.mkSmoke(),{y:H+s.r});
+  for(const s of this.smoke){s.x+=s.vx*dt*m;s.y+=s.vy*dt*m;if(s.y<H*.55)Object.assign(s,this.mkSmoke(false));    // rises only to about mid-screen, then restarts at the bottom
    if(s.x<-s.r)s.x=W+s.r;if(s.x>W+s.r)s.x=-s.r;
-   const g=x.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r);g.addColorStop(0,'rgba(150,170,200,'+s.a*thick+')');g.addColorStop(1,'rgba(150,170,200,0)');
+   const f=Math.max(0,Math.min(1,(s.y-H*.55)/(H*.3)));                                                              // fades out as it climbs
+   const g=x.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r);g.addColorStop(0,'rgba(150,170,200,'+s.a*thick*f+')');g.addColorStop(1,'rgba(150,170,200,0)');
    x.fillStyle=g;x.beginPath();x.arc(s.x,s.y,s.r,0,6.283);x.fill()}
   x.globalAlpha=1;x.shadowBlur=0}
 };
