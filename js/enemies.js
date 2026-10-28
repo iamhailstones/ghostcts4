@@ -13,10 +13,12 @@ function updEnemy(e,dt){const p=G.p,dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1
  if(e.boss)return updBoss(e,dt,dx,dy,d);
  if(e.t.range){if(d>e.t.range){mx=dx/d;my=dy/d}else if(d<e.t.range*.6){mx=-dx/d;my=-dy/d}
   if(e.t.strafe){mx+=-dy/d*.8;my+=dx/d*.8}
-  if(e.fire<=0&&d<e.t.range+90){ebullet(e,Math.atan2(dy,dx)+rnd(-.1,.1),260);e.fire=1.7}}
- else{mx=dx/d;my=dy/d;if(d<e.r+p.r+4&&e.cd<=0){hurtPlayer(e.dmg,e);e.cd=.8}}
+  if(e.fire<=0&&d<e.t.range+90&&d>e.r+p.r+8){ebullet(e,Math.atan2(dy,dx)+rnd(-.1,.1),260);e.fire=1.7}}   // no shooting while touching the soldier
+ else{if(d>e.r+p.r+2){mx=dx/d;my=dy/d}if(d<e.r+p.r+4&&e.cd<=0){hurtPlayer(e.dmg,e);e.cd=.8}}   // melee enemies stop at contact instead of walking into the soldier
  for(const o of G.enemies){if(o===e||o.dead)continue;const ox=e.x-o.x,oy=e.y-o.y,od=Math.hypot(ox,oy);if(od>0&&od<e.r+o.r){mx+=ox/od*.9;my+=oy/od*.9}}
- e.x+=mx*e.sp*dt;e.y+=my*e.sp*dt;obsPush(e);e.x=clamp(e.x,e.r,W-e.r);e.y=clamp(e.y,e.r,H-e.r)}
+ e.x+=mx*e.sp*dt;e.y+=my*e.sp*dt;
+ {const sx=e.x-p.x,sy=e.y-p.y,sd=Math.hypot(sx,sy),mn=e.r+p.r;if(sd<mn){if(sd>0){e.x=p.x+sx/sd*mn;e.y=p.y+sy/sd*mn}else{e.x=p.x+mn}}}   // never overlap the soldier
+ obsPush(e);e.x=clamp(e.x,e.r,W-e.r);e.y=clamp(e.y,e.r,H-e.r)}
 function updBoss(e,dt,dx,dy,d){const r=e.hp/e.max,a=Math.atan2(dy,dx),t=performance.now()/1000;
  e.ph=r>.66?1:r>.33?2:3;
  if(e.ph===3&&!e.shDone){e.shDone=true;e.shield=true;openCh(6,true,()=>{e.shield=false;msg('SHIELD DISABLED - ATTACK!')});msg('COMMANDER SHIELD ONLINE')}
