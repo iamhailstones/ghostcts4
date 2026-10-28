@@ -7,7 +7,7 @@ const TITLE_HTML='<div class="logo" role="heading" aria-level="1" aria-label="GH
  '<div class="sub"><span>CODE TO SURVIVE</span><b class="cts">CTS4</b></div><div class="tag">PYTHON · COMBAT · PROGRESS</div>';
 
 const Boot={
- active:false,ready:false,cinema:false,shown:0,target:0,tries:0,raf:0,t0:0,d:1,cx:null,smoke:[],emb:[],
+ active:false,ready:false,cinema:false,shown:0,target:0,tries:0,raf:0,t0:0,d:1,cx:null,smoke:[],
  RM:typeof matchMedia!=='undefined'&&matchMedia('(prefers-reduced-motion: reduce)').matches,
  start(){
   $('menuTitle').innerHTML=TITLE_HTML;                       // the menu shares the same title lockup
@@ -51,9 +51,8 @@ const Boot={
  /* ----- smoke and embers (capped counts, lower on phones) ----- */
  fxInit(){const c=$('bootFx');this.cx=c.getContext('2d');
   const rs=()=>{this.d=Math.min(devicePixelRatio||1,1.5)*(this.EW()<700?.75:1);c.width=this.EW()*this.d;c.height=this.EH()*this.d};rs();addEventListener('resize',rs);
-  const mob=this.EW()<700;this.smoke=[];this.emb=Array.from({length:mob?26:55},()=>this.mkEmb(true))},
+  this.smoke=[]},
  mkSmoke(){return{x:Math.random()*this.EW(),y:this.EH()*(.3+Math.random()*.8),r:150+Math.random()*200,vx:(Math.random()-.3)*14,vy:-(4+Math.random()*10),a:.03+Math.random()*.05}},
- mkEmb(init){return{x:Math.random()*this.EW(),y:init?Math.random()*this.EH():this.EH()+10,r:.8+Math.random()*1.8,vy:-(20+Math.random()*50),sw:Math.random()*6,a:.4+Math.random()*.6}},
  loop(){this.raf=requestAnimationFrame(()=>this.loop());
   this.shown+=(this.target-this.shown)*.08;const pct=Math.min(100,Math.round(this.shown*100+.4));
   $('bootBar').style.width=pct+'%';$('bootPct').textContent=pct+'%';this.draw()},
@@ -64,7 +63,5 @@ const Boot={
    if(s.x<-s.r)s.x=W+s.r;if(s.x>W+s.r)s.x=-s.r;
    const g=x.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r);g.addColorStop(0,'rgba(150,170,200,'+s.a*thick+')');g.addColorStop(1,'rgba(150,170,200,0)');
    x.fillStyle=g;x.beginPath();x.arc(s.x,s.y,s.r,0,6.283);x.fill()}
-  for(const e of this.emb){e.y+=e.vy*dt*m;e.x+=Math.sin(now/700+e.sw)*.5*m;if(e.y<-10)Object.assign(e,this.mkEmb(false));
-   x.globalAlpha=e.a*(.6+.4*Math.sin(now/90+e.sw*9));x.shadowColor='#ff8a3c';x.shadowBlur=8;x.fillStyle='#ffb35a';x.beginPath();x.arc(e.x,e.y,e.r,0,6.283);x.fill()}
   x.globalAlpha=1;x.shadowBlur=0}
 };
