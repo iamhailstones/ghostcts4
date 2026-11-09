@@ -1,0 +1,272 @@
+/* GHOST - styles */
+:root{--accent:#e0202f;--red:#ff3b4a;--green:#39ff7a}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(ellipse at 50% 30%,#2a0a0f,#0a0405 75%);color:#fff;font-family:"Courier New",monospace;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+#wrap{position:relative;flex:1 1 auto;min-height:0;width:100%}
+canvas{width:100%;display:block;background:#0d0507;border:0;cursor:crosshair}
+canvas#c{height:100%}
+#hud{position:fixed;top:8px;right:12px;z-index:7;display:flex;flex-wrap:wrap;gap:8px;font-size:13px;padding:0;color:#fff;align-items:center}#hud b{color:#fff}
+.bar{display:inline-block;width:100px;height:10px;background:#2a1215;vertical-align:middle}.bar i{display:block;height:100%;background:var(--green);width:100%}
+.ov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(8,2,3,.93);text-align:center;padding:14px;overflow:auto}
+.ov.on{display:flex}
+h1{font-size:clamp(40px,10vw,76px);letter-spacing:12px;margin:0;color:#fff;text-shadow:0 0 18px var(--accent)}
+h2{margin:0;color:#fff;letter-spacing:3px}
+button{font:inherit;background:#2a0a0f;color:#fff;border:1px solid var(--accent);padding:9px 20px;cursor:pointer;letter-spacing:2px}
+button:hover,button:focus-visible{background:var(--accent);color:#fff;outline:none}
+button:disabled{opacity:.4;cursor:default}
+textarea{width:min(580px,92%);height:120px;background:#050203;color:var(--green);border:1px solid var(--green);font:inherit;padding:8px}
+pre{margin:0;color:#7dffb0;background:#050203;padding:8px;text-align:left;max-width:580px;overflow:auto}
+.t{color:#fff;max-width:580px;font-size:14px;line-height:1.5}
+#msg{position:absolute;top:10px;left:0;right:0;text-align:center;color:#ffd54f;font-weight:bold;pointer-events:none;text-shadow:0 0 6px #000}
+#foot{flex:none;font-size:12px;color:#e6d6d8;padding:4px 8px;text-align:center}
+#wrap::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:6px;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px)}
+canvas{box-shadow:0 0 34px rgba(224,32,47,.4),inset 0 0 40px rgba(0,0,0,.6)}
+h1{animation:glow 2.4s ease-in-out infinite alternate}
+@keyframes glow{to{text-shadow:0 0 30px #ff3b4a,0 0 10px #39ff7a;transform:scale(1.04) rotate(-1deg)}}
+@keyframes glitch{0%,90%,100%{transform:none}93%{transform:translate(-5px,2px) skew(-6deg)}96%{transform:translate(5px,-2px) skew(6deg)}}
+#ld{width:min(360px,70%);height:8px;background:#2a0a0f;border:1px solid var(--accent)}
+#ld i{display:block;height:100%;width:0;background:var(--green);animation:ld 2s forwards}
+@keyframes ld{to{width:100%}}
+.blink{animation:bl 1s infinite;color:#fff;letter-spacing:3px;font-size:14px}
+@keyframes bl{50%{opacity:.2}}
+#pname{font:inherit;font-size:16px;text-align:center;letter-spacing:3px;text-transform:uppercase;background:#050203;color:#fff;border:1px solid var(--green);padding:9px 14px;width:min(260px,80%)}
+#pname:focus{outline:none;box-shadow:0 0 12px var(--green)}
+
+.ov{z-index:5}#msg{z-index:3}
+#touch{position:absolute;inset:0;pointer-events:none;z-index:2;touch-action:none}
+#touch .js{position:absolute;bottom:14px;width:120px;height:120px;border-radius:50%;background:rgba(224,32,47,.12);border:2px solid rgba(224,32,47,.5);pointer-events:auto;touch-action:none}
+#jl{left:14px}#jr{right:14px}
+#touch .js i{position:absolute;left:36px;top:36px;width:48px;height:48px;border-radius:50%;background:rgba(255,110,120,.5)}
+#touch button{position:absolute;pointer-events:auto;touch-action:none;width:58px;height:58px;border-radius:50%;padding:0;font-size:12px}
+#tr{right:150px;bottom:20px}#tb{right:150px;bottom:86px}#tq{right:20px;bottom:150px}
+@media(max-width:700px){#hud{font-size:11px;gap:2px 10px}#foot{display:none}}
+
+/* ---------- cinematic boot screen + title lockup ---------- */
+#boot{position:fixed;inset:0;z-index:100;background:#000000;overflow:hidden;transition:opacity .9s ease}
+#boot.out{opacity:0;pointer-events:none}
+#boot .artbox{position:absolute;left:0;top:0;opacity:0;transition:opacity 1.8s ease}
+#boot.s-art .artbox{opacity:1}
+#boot .artbox img{width:100%;height:100%;display:block;position:relative;z-index:0;-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent 100%);mask-image:linear-gradient(90deg,#000 80%,transparent 100%)}
+#bootFx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity 2s;background:none;border:0;border-radius:0;box-shadow:none}   /* the general canvas style (dark panel + border) must not apply to the smoke layer */#boot.s-art #bootFx{opacity:1}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 35% 45%,transparent 55%,rgba(0,0,0,.7) 100%)}
+/* the two glowing RED eyes of the masked figure (positions are percentages of the art, which always keeps the same 800x1254 shape) */
+.seye{position:absolute;width:3.4%;height:1.25%;border-radius:50%;opacity:0;mix-blend-mode:screen;z-index:2;transform:translate(-50%,-50%) rotate(var(--rot,0deg));
+ background:radial-gradient(ellipse,#fff 0,#ff6a6a 30%,rgba(255,0,0,0) 75%);box-shadow:0 0 1.2vh .4vh rgba(255,30,30,.85);transition:opacity 1.6s}
+.e1{left:49.4%;top:20.7%;--rot:-28deg}.e2{left:58.1%;top:19.8%;width:2.8%;height:1.1%;--rot:-12deg}
+#boot.s-eyes .seye{opacity:1;animation:blink 5.7s infinite 1.6s}
+@keyframes blink{0%,83%,87%,93%,100%{transform:translate(-50%,-50%) rotate(var(--rot,0deg)) scaleY(1);filter:brightness(1)}
+ 84.5%,94.5%{transform:translate(-50%,-50%) rotate(var(--rot,0deg)) scaleY(.06);filter:brightness(.15)}}
+.bootui{position:absolute;left:max(46vh,28%);right:4%;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:26px;text-align:center}
+.lockup{display:flex;flex-direction:column;align-items:center;gap:12px}
+.logo{font:italic 900 clamp(64px,13vw,150px)/1 Impact,"Arial Black","Haettenschweiler",sans-serif;letter-spacing:.02em;display:flex;align-items:center;
+ background:linear-gradient(180deg,#ff3030 8%,#d10000 48%,#a80000 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px rgba(0,0,0,.9);
+ filter:drop-shadow(0 0 14px rgba(190,0,0,.6))}
+.gmask{height:.84em;width:auto;margin:0 .03em;overflow:visible;filter:drop-shadow(0 0 6px rgba(210,0,0,.75))}
+.gmask .oring{fill:#000;stroke:#d10000;stroke-width:7}
+@keyframes eyelid{0%,100%{transform:translateY(-100%)}}
+.gmask .eye{fill:#ff2a2a;filter:drop-shadow(0 0 3px #ff0000);transform-box:fill-box;transform-origin:center;animation:eyeblink 3.6s infinite .4s!important}
+/* irregular, natural blinking: single blinks at different moments and one double blink per cycle; always ends open */
+@keyframes eyeblink{0%,40%,46%,70%,76%,100%{transform:scaleY(1);opacity:1}43%,73%{transform:scaleY(.04);opacity:.35}}
+.sub{display:flex;align-items:center;justify-content:center;gap:14px;font:600 clamp(14px,2.6vw,26px)/1 Rajdhani,"Segoe UI","Helvetica Neue",Arial,sans-serif;letter-spacing:.42em;color:#fff;margin-right:-.42em}
+.cts{font-size:.62em;letter-spacing:.2em;padding:4px 8px;border:1px solid #e0202f;color:#ff6a74;background:rgba(224,32,47,.12)}
+.tag{font:12px "Courier New",monospace;letter-spacing:.35em;color:#39ff7a}
+.lockup.sm .logo{font-size:clamp(48px,11vw,84px)}.lockup.sm .sub{font-size:clamp(11px,2vw,16px)}
+#bootTitle .logo,#bootTitle .sub,#bootTitle .tag{opacity:0}
+#boot.s-ghost #bootTitle .logo{animation:revealGhost 1.7s forwards,glitch 7s 2.4s infinite}
+#boot.s-cts #bootTitle .sub{animation:revealSub 1.6s forwards}#boot.s-cts #bootTitle .tag{animation:fadeIn 2s .8s forwards}
+@keyframes revealGhost{0%{opacity:0;transform:translateX(-14px) skewX(-18deg);filter:blur(12px)}
+ 18%{opacity:.8;transform:translateX(10px);filter:blur(2px)}28%{opacity:.15}
+ 45%{opacity:1;transform:translateX(-5px);filter:none}60%{transform:translateX(3px)}
+ 100%{opacity:1;transform:none;filter:blur(0) drop-shadow(0 0 14px rgba(190,0,0,.6))}}
+@keyframes glitch{0%,95%,100%{transform:none}96%{transform:translate(-4px,1px) skewX(-6deg)}98%{transform:translate(3px,-1px) skewX(5deg)}}
+@keyframes revealSub{from{opacity:0;letter-spacing:.95em}to{opacity:1;letter-spacing:.42em}}
+@keyframes fadeIn{to{opacity:1}}
+#bootLoad{width:min(420px,80%)}
+.trk{height:6px;background:#1a0709;border:1px solid #6a1820}.trk i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e0202f,#ff6a74);box-shadow:0 0 12px #e0202f}
+.lbl{display:flex;justify-content:space-between;font:11px "Courier New",monospace;letter-spacing:.2em;color:#fff;margin-top:6px}
+#bootGo{display:none;font:900 18px Impact,"Arial Black",sans-serif;letter-spacing:.3em;padding:14px 46px;background:rgba(224,32,47,.08);border:2px solid #e0202f;color:#fff;box-shadow:0 0 18px rgba(224,32,47,.5) inset,0 0 18px rgba(224,32,47,.4)}
+#bootGo.on{display:block;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 28px rgba(224,32,47,.8) inset,0 0 30px rgba(224,32,47,.7)}}
+#bootErr{display:none;color:#ff6b7a;font-size:14px}#bootErr.on{display:flex;flex-direction:column;gap:10px;align-items:center}
+@media(max-aspect-ratio:1/1){
+.vig{background:linear-gradient(0deg,#000 10%,transparent 48%),radial-gradient(ellipse at 50% 35%,transparent 55%,rgba(0,0,0,.6) 100%)}
+ .bootui{left:0;right:0;top:auto;height:52vh;padding:0 5vw 5vh;justify-content:flex-end;gap:20px}}
+@media(prefers-reduced-motion:reduce){#boot .artbox{transition:none}#bootTitle .logo,#bootTitle .sub,#bootTitle .tag{opacity:1;animation:none!important}
+ .seye{opacity:1!important;animation:none!important}.gmask .eye{animation:none}#bootGo.on{animation:none}}
+
+/* ---------- tactical (CoD-style) in-game look ---------- */
+canvas#c{cursor:none;border:0;box-shadow:none;filter:contrast(1.06) saturate(1.08)}
+#wrap::after{display:none}
+#hud>span{display:none}#hud{justify-content:flex-end;padding:2px}
+#msg{color:#e8ece0;font-family:Impact,"Arial Black",sans-serif;letter-spacing:.2em;font-size:18px;top:112px}
+
+/* ---------- gun market + empty-magazine pop-up (new, uses the existing palette and fonts) ---------- */
+#gunb{position:absolute;top:12px;right:12px;z-index:1;padding:6px 12px;font-size:12px}
+.gmList{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:860px}
+.gmc{width:190px;background:#140608;border:1px solid #5a1218;padding:8px;text-align:left;font-size:12px;color:#fff}
+.gmc.sel{border-color:#39ff7a;box-shadow:0 0 10px rgba(57,255,122,.35)}
+.gmc b{color:#fff;letter-spacing:3px;font-size:14px}.gmc canvas{display:block;margin:4px auto;background:#050203;width:100%;height:auto}
+.gmc .st{display:flex;justify-content:space-between;line-height:1.5}.gmc .row{display:flex;margin-top:6px}.gmc button{flex:1;padding:5px 4px;font-size:11px;letter-spacing:1px}
+.gmc .note{margin-top:6px;color:#39ff7a;font-size:11px;letter-spacing:1px}
+#rl{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);display:none;z-index:4;background:rgba(8,2,3,.93);border:1px solid #e0202f;padding:10px 14px;text-align:center;box-shadow:0 0 18px rgba(224,32,47,.35);animation:rlIn .25s}
+#rl.on{display:block}#rl b{font:900 16px Impact,"Arial Black",sans-serif;letter-spacing:3px;color:#ff6b7a}
+#rl pre{margin:6px auto;color:#7dffb0;background:#050203;padding:6px 10px;font-size:12px;text-align:center}
+#rl .row{display:flex;gap:8px;justify-content:center;margin-top:6px}#rl button{padding:6px 12px;font-size:12px}
+@keyframes rlIn{from{opacity:0;transform:translate(-50%,12px)}}
+#tw{right:86px;bottom:150px}#tg{left:86px;bottom:150px}
+.gmc .py{color:#39ff7a;font-family:"Courier New",monospace;font-size:11px;margin-left:4px}
+.gmc .rule{margin:6px 0 0;color:#fff;font-size:11px;line-height:1.4;min-height:60px}
+#cl{color:#fff;border-left:2px solid #39ff7a;padding-left:10px}
+#cfb{white-space:pre-wrap}
+
+/* ---------- Python rule console + extra navigation buttons (same palette and fonts) ---------- */
+#pyr .row,#chal .row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}
+#pyr pre{text-align:left;font-size:13px;white-space:pre-wrap;max-width:580px}#pyr textarea{height:64px}
+#pyWhy{border-left:2px solid #39ff7a;padding-left:10px;max-width:580px}#pyr button{padding:7px 12px;font-size:12px}
+
+/* ---------- phone landscape fit (desktop is not affected: needs a touch screen) ---------- */
+
+/* ---------- phones and tablets (touch screens only; laptops/desktops keep the original layout) ---------- */
+@media (pointer:coarse){
+ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+ body{height:100vh;height:100dvh;min-height:0}
+ canvas#c{border:0;border-radius:0;box-shadow:none;touch-action:none}
+ button{min-height:40px}
+ /* every screen/panel uses the whole display; a strip at the top is kept free for the PAUSE button, content scrolls inside the panel */
+ .ov{position:fixed;inset:0;justify-content:flex-start;padding:calc(44px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}
+ .ov>:first-child{margin-top:auto}.ov>:last-child{margin-bottom:auto}
+ #gunb{position:static}
+ #hud{position:fixed;top:calc(4px + env(safe-area-inset-top));right:calc(6px + env(safe-area-inset-right));z-index:7;padding:0}#hud button{padding:6px 14px;font-size:12px}
+}
+@media (pointer:coarse) and (orientation:landscape){
+ #foot{display:none}
+ .ov{gap:6px}.ov button{padding:6px 14px;font-size:13px}.lockup.sm .logo{font-size:40px}.lockup.sm .tag{display:none}.gmc{width:170px}.gmc canvas{max-height:36px}#pyIn{height:44px!important}
+}
+/* ---------- lesson code editor: readable, never congested, scrolls to the caret ---------- */
+#cinfo{display:flex;flex-direction:column;align-items:center;gap:10px;max-width:100%}
+#cin{font:15px/1.6 "Courier New",monospace;white-space:pre;overflow:auto;tab-size:4;caret-color:#39ff7a;color:#b6ffd0;letter-spacing:.2px;height:clamp(120px,24vh,260px);width:min(640px,94%)}
+#chal .t{font-size:14px;line-height:1.5}#cc{font-size:14px}
+@media (pointer:coarse){#chal{overflow:hidden;gap:6px}#cinfo{flex:0 1 auto;max-height:40%;overflow:auto}#cin{font-size:16px;flex:1 1 90px;min-height:80px;height:auto;width:min(900px,100%)}#cfb{max-height:22%;overflow:auto;flex:0 1 auto}#chal>div:last-child{flex:none}
+ body.kb #chal,body.kb #pyr{top:var(--vvt,0px);bottom:auto;height:var(--vvh,100%)}body.kb #cinfo{max-height:26%}
+ body.kb #chal{overflow:auto;padding-top:8px;gap:4px}body.kb #chal h2{font-size:15px}body.kb #chal button{min-height:34px;padding:4px 10px}}
+textarea:focus{outline:2px solid #39ff7a;outline-offset:0}
+/* ---------- rotate prompt: shown only when landscape cannot be locked ---------- */
+#orient{position:fixed;inset:0;z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#050203;color:#fff;text-align:center;padding:20px;font-family:"Courier New",monospace}
+#orient.on{display:flex}#orient b{font:900 34px Impact,"Arial Black",sans-serif;letter-spacing:6px;color:#fff;text-shadow:0 0 18px #e0202f}
+#orient .phone{width:44px;height:72px;border:3px solid #e0202f;border-radius:8px;animation:turn 2.4s ease-in-out infinite}
+@keyframes turn{0%,20%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+
+/* ---------- exit / confirm / tips / audio settings / button feedback ---------- */
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:active{transform:translateY(1px) scale(.98);filter:brightness(1.25)}button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#cfm .row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.aud{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;align-items:center;font-size:12px;color:#fff;letter-spacing:1px}
+.aud input[type=range]{width:96px;accent-color:#e0202f;vertical-align:middle;min-height:0}.aud .vb{padding:6px 12px;font-size:12px;min-height:34px}
+#tip{position:absolute;left:50%;top:150px;transform:translateX(-50%);max-width:min(520px,76%);display:none;z-index:4;background:rgba(8,2,3,.9);border:1px solid #e0202f;color:#fff;font-size:13px;line-height:1.4;padding:8px 38px 8px 12px;text-align:center}
+#tip.on{display:block}#tip button{position:absolute;right:2px;top:2px;min-height:28px;padding:0 8px;font-size:12px}
+#cguide{color:#39ff7a;font-size:13px}
+
+/* the main menu grew by two rows (audio settings, EXIT GAME): tighter spacing keeps it inside the panel, and it scrolls from the top if a screen is still too short */
+#menu{justify-content:flex-start;gap:6px}#menu>:first-child{margin-top:auto}#menu>:last-child{margin-bottom:auto}#menu button{padding:7px 18px}
+/* ---------- main menu: button grid, smiling soldier assistant + contact links, chat panel, tutorial ---------- */
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:min(480px,100%)}.mgrid button{width:100%;padding:7px 8px;font-size:12px;letter-spacing:1px}
+.asst{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+#menu .asstbtn,.asstbtn{background:none;border:0;padding:0;width:84px;height:98px;min-height:0;cursor:pointer;border-radius:12px}.asstbtn:hover,.asstbtn:focus-visible{background:none;filter:drop-shadow(0 0 8px #e0202f);color:inherit}
+.solsvg{width:100%;height:100%;display:block;overflow:visible;animation:solIn .7s ease-out both}
+.sol{transform-box:view-box;transform-origin:60px 140px;animation:solBob 3.2s ease-in-out infinite}.hand{transform-box:view-box;transform-origin:90px 108px;animation:solWave .8s ease-in-out infinite!important}
+.eyes{transform-box:view-box;transform-origin:60px 63px;animation:solBlink 3.2s infinite!important}
+.solsvg.pop{animation:solPop .5s ease-out}.solsvg.think .sol{animation:solThink 1s ease-in-out infinite}
+@keyframes solIn{from{opacity:0;transform:translateY(14px) scale(.85)}to{opacity:1;transform:none}}
+@keyframes solBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
+@keyframes solWave{0%,100%{transform:rotate(14deg)}50%{transform:rotate(-26deg)}}
+@keyframes solBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes solPop{0%{transform:scale(1)}40%{transform:scale(1.12) rotate(-3deg)}100%{transform:scale(1)}}
+@keyframes solThink{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(3deg) translateY(-1px)}}
+.asstt{display:flex;flex-direction:column;text-align:left}.asstt b{color:#fff;font-size:16px;letter-spacing:1px}.asstt span{font-size:11px;color:#fff;letter-spacing:2px}
+.assistant-contact-links{display:flex;gap:10px}.assistant-contact-links a{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid #e0202f;color:#fff;background:#2a0a0f;border-radius:8px;transition:background .12s}
+.assistant-contact-links a:hover,.assistant-contact-links a:focus-visible{background:#e0202f;color:#fff;outline:2px solid #fff;outline-offset:2px}.assistant-contact-links svg{width:22px;height:22px}
+@media(prefers-reduced-motion:reduce){.solsvg,.sol{animation:none!important}}   /* the gentle wave and blink stay on */
+
+#chatp{justify-content:flex-start;gap:6px}#chatp>*{width:min(640px,100%);box-sizing:border-box}
+.chead{display:flex;align-items:center;gap:10px}.chead b{flex:1;text-align:left;letter-spacing:2px;color:#fff}.chsol{width:40px;height:46px;display:inline-block}.chsol svg{width:100%;height:100%}
+#chLog{flex:1 1 auto;min-height:90px;overflow:auto;border:1px solid #5a1218;background:#050203;padding:8px;text-align:left;font-size:14px;line-height:1.5}
+.cm{margin:4px 0;padding:6px 10px;border-radius:8px;max-width:92%;white-space:pre-wrap;overflow-wrap:anywhere}.cm.user{background:#2a0a0f;margin-left:auto;color:#fff}.cm.bot{background:#1a0709;color:#fff;border-left:3px solid #39ff7a}
+#chSug{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}#chSug button{font-size:12px;padding:4px 10px;min-height:32px}
+.crow{display:flex;gap:6px;align-items:center}.crow input{flex:1;min-width:0;font:inherit;font-size:16px;background:#050203;color:#fff;border:1px solid #39ff7a;padding:8px}
+.crow button{flex:none}#chMic.rec{background:#c0392b;color:#fff;animation:recp 1s infinite}@keyframes recp{50%{opacity:.6}}
+.cset{flex-wrap:wrap;justify-content:center}.cset select{max-width:230px;background:#050203;color:#fff;border:1px solid #e0202f;padding:6px;font:inherit;font-size:12px}
+#chNote{min-height:18px;font-size:12px;color:#ffd54f;text-align:left}
+#tut .tinner{width:min(560px,100%);display:flex;flex-direction:column;align-items:center;gap:10px}#tut #tutBody{font-size:15px;line-height:1.55}#tutStep{color:#39ff7a;letter-spacing:1px}.tsol{width:70px;height:82px;display:inline-block}.tsol svg{width:100%;height:100%}
+#tut .row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+
+#mailfb{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;font-size:12px;color:#fff;border:1px solid #e0202f;background:#1a0709;padding:6px 10px;max-width:min(560px,100%)}#mailfb[hidden]{display:none}
+#mailfb b{color:#fff;overflow-wrap:anywhere}#mailfb button,#mailfb a{padding:5px 10px;font-size:11px;min-height:32px;display:inline-flex;align-items:center;border:1px solid #e0202f;color:#fff;background:#2a0a0f;text-decoration:none;letter-spacing:1px;cursor:pointer}
+#mailfb a:hover,#mailfb a:focus-visible,#mailfb button:hover{background:#e0202f;color:#fff}
+
+/* ---------- touch controls v3: big, glassy red-and-black controls that sit on the battlefield (sizes + positions come from layout.js) ---------- */
+@media (pointer:coarse){
+ :root{--js:117px;--btn:60px;--gap:12px;--edge:12px}
+ #wrap{position:fixed;inset:0;width:auto;height:auto}
+ #touch{position:fixed;inset:0;z-index:3;display:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}body.playing #touch{display:block}#touch *{-webkit-tap-highlight-color:transparent}
+ #touch .js{position:absolute;width:var(--js);height:var(--js);border-radius:50%;pointer-events:auto;touch-action:none;opacity:.95;
+  background:radial-gradient(circle,rgba(0,0,0,.38) 0,rgba(0,0,0,.2) 50%,rgba(224,32,47,.16) 76%,rgba(224,32,47,.04) 100%);
+  border:2px solid rgba(255,80,92,.5);box-shadow:0 0 24px rgba(224,32,47,.22),inset 0 0 24px rgba(0,0,0,.45);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);transition:transform .08s,box-shadow .1s,border-color .1s}
+ #touch .js i{position:absolute;left:27%;top:27%;width:46%;height:46%;border-radius:50%;pointer-events:none;background:radial-gradient(circle at 35% 30%,rgba(255,170,176,.8),rgba(224,32,47,.65));border:1px solid rgba(255,255,255,.4);box-shadow:0 0 14px rgba(224,32,47,.5)}
+ #jr{border-color:rgba(255,90,102,.7)}
+ #jr .ficon{position:absolute;left:17%;top:17%;width:66%;height:66%;color:#fff;pointer-events:none;opacity:.55}
+ #touch .js.on{border-color:#ff5a66;box-shadow:0 0 34px rgba(224,32,47,.6),inset 0 0 24px rgba(0,0,0,.35);transform:scale(.97)}
+ #touch button{position:absolute;pointer-events:auto;touch-action:none;width:var(--btn);height:var(--btn);min-height:0;padding:0;border-radius:50%;font-size:calc(var(--btn)*.25);font-weight:700;letter-spacing:.5px;color:#fff;text-shadow:0 1px 3px #000;opacity:.95;
+  background:radial-gradient(circle at 50% 40%,rgba(60,8,14,.62),rgba(10,2,4,.6));border:2px solid rgba(255,80,92,.55);box-shadow:0 0 16px rgba(224,32,47,.25),inset 0 0 10px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+ #touch button:active{background:rgba(224,32,47,.72);color:#fff;transform:scale(.93)}
+ #touch #ta{width:auto;min-width:calc(var(--btn)*1.5);padding:0 18px;border-radius:calc(var(--btn)/2)}
+ #touch #ta.on{background:rgba(40,200,120,.78);border-color:#8fffc0;box-shadow:0 0 18px rgba(120,255,180,.7);color:#fff}
+ /* PAUSE and PY: top right, big enough to hit, clear of the notch */
+ #hud{top:calc(8px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));gap:12px}
+ #hud button{min-height:calc(var(--btn)*.8);padding:0 22px;font-size:15px;font-weight:700;color:#fff;background:rgba(18,3,6,.68);border:2px solid rgba(255,80,92,.6);border-radius:12px;box-shadow:0 0 14px rgba(224,32,47,.25)}
+ #hud button:active{background:rgba(224,32,47,.75)}
+ #rl{bottom:var(--rlb,96px)}
+ body{touch-action:manipulation}
+}
+body.playing,body.playing #wrap,body.playing canvas{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+/* ---------- AI Challenge panel ---------- */
+#aiq{justify-content:flex-start;gap:8px}#aiq>*{width:min(640px,100%);box-sizing:border-box}
+#aiqQ{font-size:clamp(15px,2.4vw,19px);line-height:1.45;color:#fff;border:1px solid #e0202f;background:#1a0709;padding:14px;min-height:58px;text-align:left;overflow-wrap:anywhere}
+#aiqIn{font:inherit;font-size:16px}#aiqFb.good{color:#39ff7a}#aiqFb.bad{color:#ffb3b3}#aiqHint{color:#ffd93d;text-align:left}#aiqMeta{color:#fff;font-size:12px}
+#aiq button:disabled,#aiqIn:disabled{opacity:.45}
+#aiq .crow{flex-wrap:wrap;justify-content:center}#aiq .crow button{flex:1 1 auto;min-width:0;padding-left:10px;padding-right:10px}#aiq .crow input{flex:1 1 160px}
+
+/* PAUSE only exists during gameplay; menus, lessons, practice, chat have their own BACK / CLOSE / MAIN MENU buttons */
+#pbtn{display:none}body.playing #pbtn{display:inline-block}
+
+/* ---------- loading screen: landscape on EVERY device (a portrait touch device shows it turned 90 degrees) ---------- */
+#boot.rot{inset:auto;left:100%;top:0;width:var(--bw);height:var(--bh);transform-origin:0 0;transform:rotate(90deg)}
+#boot.rot .logo{font-size:clamp(64px,calc(var(--bw)*.13),150px)}
+#boot.rot .sub{font-size:clamp(14px,calc(var(--bw)*.026),26px)}
+#boot.rot .bootui{left:max(calc(var(--bh)*.46),28%);right:4%;top:0;bottom:0;height:auto;padding:0;justify-content:center;gap:26px}
+#boot.rot .seye{box-shadow:0 0 calc(var(--bh)*.012) calc(var(--bh)*.004) rgba(255,30,30,.85)}
+
+#orient #orientHint{font-size:12px;color:#fff;max-width:300px;line-height:1.4}#orient{overscroll-behavior:none;touch-action:none}
+
+.mgrid button.wide{grid-column:1/-1}#menu .asst{margin-top:2px}
+
+/* ---------- red & black theme for every panel (white text stays readable) ---------- */
+.ov{background:radial-gradient(ellipse at 50% 0%,rgba(96,10,20,.5),rgba(8,2,3,.94) 70%)}
+button{background:#2a0a0f;border-color:var(--accent)}button:hover,button:focus-visible{background:var(--accent);color:#fff}
+#orient .phone{border-color:var(--accent)}
+
+/* ---------- on-screen reload panel (replaces the full-screen Python console): world stays visible and frozen behind it ---------- */
+#rearm{position:absolute;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translateX(-50%);display:none;z-index:6;min-width:min(340px,86%);background:rgba(8,2,3,.9);border:1px solid #e0202f;padding:10px 16px 12px;text-align:center;box-shadow:0 0 22px rgba(224,32,47,.4);animation:rlIn .2s}
+#rearm.on{display:block}#rearm b{font:900 15px Impact,"Arial Black",sans-serif;letter-spacing:3px;color:#ff6b7a}
+#rearm pre{margin:7px auto;color:#7dffb0;background:#050203;padding:6px 10px;font-size:13px;text-align:center;white-space:pre-wrap}
+#rmBox button{min-width:200px;padding:11px 18px;font-size:15px;letter-spacing:2px;animation:rmIn .18s ease-out}#rmBox button.go{border-color:#39ff7a;color:#39ff7a}
+@keyframes rmIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}
+
+/* ---------- tuple pistol automatic reload indicator ---------- */
+#autorl{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);display:none;z-index:4;min-width:min(300px,80%);background:rgba(8,2,3,.9);border:1px solid #6fd3ff;padding:8px 14px 10px;text-align:center;box-shadow:0 0 18px rgba(111,211,255,.35);pointer-events:none}
+#autorl.on{display:block}#autorl b{font:900 14px Impact,"Arial Black",sans-serif;letter-spacing:3px;color:#6fd3ff;vertical-align:middle}
+.arI{width:22px;height:22px;color:#6fd3ff;vertical-align:middle;margin-right:6px;animation:arSpin 1s linear infinite}@keyframes arSpin{to{transform:rotate(360deg)}}
+#arT{margin-top:4px;color:#fff;font-size:13px;letter-spacing:1px}#autorl pre{margin:6px auto 0;color:#7dffb0;background:#050203;padding:5px 10px;font-size:12px;text-align:left;white-space:pre}
+.arbar{height:4px;background:rgba(255,255,255,.15);margin-top:8px}.arbar i{display:block;height:100%;width:0;background:#6fd3ff}
+@media (pointer:coarse){#autorl{bottom:var(--rlb,96px)}}
