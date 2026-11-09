@@ -32,6 +32,7 @@ But this is more than a shooter. Python is part of your survival. Solve challeng
 - **X (Twitter):** [@iamhailstones](https://x.com/iamhailstones) · [@GHOST_CTS_4](https://x.com/GHOST_CTS_4)
 - **YouTube:** [iamhailstones](https://www.youtube.com/@iamhailstones) · [GHOSTCTS4](https://www.youtube.com/@GHOSTCTS4)
 - **TikTok:** [@iamhailstones](https://www.tiktok.com/@iamhailstones)
+- **Instagram:** [@iam_hailstones](https://www.instagram.com/@iam_hailstones)
 
 ## Play GHOST CTS-4
 
