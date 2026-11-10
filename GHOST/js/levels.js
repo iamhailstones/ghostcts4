@@ -1,0 +1,147 @@
+"use strict";
+/* levels.js - configuration: balance values, enemy types, 50-level table, obstacles */
+/* ---------- CONFIG (edit to rebalance) ---------- */
+const CFG={hp:100,mag:30,reserve:48,bombs:5,maxBombs:9,speed:230,fuse:.8,blastR:115,blastDmg:100,dmg:15,fireRate:.22,reload:1.2};
+const TYPES={
+ grunt:{hp:30,sp:70,dmg:8,r:12,col:'#ff5a5a',pts:10},
+ runner:{hp:20,sp:150,dmg:6,r:10,col:'#ffd93d',pts:15},
+ shooter:{hp:40,sp:55,dmg:8,r:12,col:'#ff9f43',pts:20,range:260},
+ heavy:{hp:150,sp:38,dmg:20,r:18,col:'#b24bf3',pts:40},
+ elite:{hp:90,sp:90,dmg:12,r:14,col:'#ff2e63',pts:50,range:210,strafe:1}};
+
+const LV=[
+ 'RECRUIT','CONTACT','AMBUSH','SOLAR FLARE','HUNTER','PHANTOM','WARZONE','LAST STAND','GHOST PROTOCOL','THE WARDEN',
+ 'IRON RAIN','NIGHT SIEGE','CRIMSON TIDE','STORMFRONT','DEAD ZONE','BLACK SUN','FINAL APPROACH','IRON FORTRESS','THE LAST GATE','SHADOW SPIRE',
+ 'CYBER INGRESS','VECTOR SHIFT','QUANTUM BREACH','NEURAL GRID','OVERCLOCK','PULSE CANYON','FIREWALL SIEGE','COLD STORAGE','SYNAPSE RUN','CITADEL GATE',
+ 'TITAN CORE','OMEGA PROTOCOL','ZERO DAY','DATA STORM','MAINFRAME LOCK','SPECTRE RUN','VOID ENGINE','APEX HUNTER','TERMINAL SHADOW','DARK HORIZON',
+ 'SYSTEM PURGE','REDLINE','ECLIPSE','IRON CLOUD','VORTEX RUN','CYBER HELL','COMMAND INGRESS','SANCTUM DEFENSE','WAR COUNCIL','THE COMMANDER'
+];
+
+const COUNT=[
+ 5, 8, 12, 16, 20, 24, 28, 32, 36, 40,
+ 44, 48, 52, 56, 60, 62, 64, 66, 68, 70,
+ 72, 74, 76, 78, 80, 82, 84, 86, 88, 90,
+ 92, 94, 96, 98, 100, 102, 104, 106, 108, 110,
+ 112, 114, 116, 118, 120, 122, 124, 126, 128, 0
+];
+
+const POOL=[
+ ['grunt'],['grunt','runner'],['grunt','runner','shooter'],['grunt','shooter','heavy'],['grunt','shooter','runner','elite'],
+ ['runner','shooter','heavy','elite'],['grunt','runner','shooter','heavy','elite'],['shooter','heavy','elite','runner'],['grunt','shooter','heavy','elite'],['grunt','heavy','elite'],
+ ['shooter','heavy','elite','runner'],['shooter','shooter','heavy','elite'],['grunt','runner','shooter','elite','heavy'],['elite','heavy','shooter','runner'],['elite','elite','shooter','heavy'],
+ ['runner','elite','shooter','heavy','grunt'],['elite','elite','heavy','shooter'],['elite','heavy','elite','shooter','runner'],['elite','elite','elite','heavy','shooter'],['grunt','elite','heavy'],
+ ['runner','shooter','elite'],['shooter','heavy','elite'],['elite','runner','heavy'],['grunt','shooter','elite'],['elite','heavy','shooter'],
+ ['runner','elite','heavy'],['shooter','elite','heavy'],['elite','runner','shooter'],['grunt','heavy','elite'],['elite','heavy','runner'],
+ ['shooter','heavy','elite'],['elite','elite','heavy'],['runner','elite','shooter'],['heavy','elite','shooter'],['elite','runner','heavy'],
+ ['shooter','elite','heavy'],['heavy','elite','elite'],['runner','shooter','elite'],['elite','heavy','runner'],['elite','elite','heavy'],
+ ['shooter','heavy','elite'],['runner','elite','heavy'],['heavy','elite','shooter'],['elite','runner','elite'],['heavy','elite','heavy'],
+ ['elite','runner','shooter'],['heavy','elite','elite'],['runner','heavy','elite'],['elite','elite','heavy'],['grunt']
+];
+
+const OBS=[{x:200,y:150,w:80,h:80},{x:620,y:380,w:100,h:70},{x:420,y:250,w:60,h:100},{x:90,y:420,w:90,h:50},{x:700,y:120,w:70,h:90}];
+
+const TIPS=[
+ 'Variables store information: ammo = 12.',
+ 'Integers are whole numbers; floats have decimal points: rate = 1.5.',
+ 'Strings are wrapped in quotes: name = "Ghost".',
+ 'Booleans hold either True or False.',
+ 'Use == to compare equality and = to assign.',
+ 'if / else statements choose between code paths based on conditions.',
+ 'Indentation (4 spaces) defines code blocks in Python.',
+ 'Combine conditions using and, or, and not.',
+ 'The len() function returns the count of items in a sequence.',
+ 'print() outputs text or numbers to the console.',
+ 'Lists keep ordered items: weapons = ["pistol", "rifle"].',
+ 'list.append(x) adds an item to the end of a list.',
+ 'list.pop() removes and returns the last element.',
+ 'Access list elements with index: first = items[0], last = items[-1].',
+ 'Slice lists with [start:end]: items[0:2].',
+ 'Tuples are immutable sequences created with parentheses: coords = (10, 20).',
+ 'Sets contain unique items: uniq = set([1, 1, 2]) becomes {1, 2}.',
+ 'Dictionaries store key-value pairs: stats = {"hp": 100, "ammo": 30}.',
+ 'Access dictionary values safely with dict.get(key, default).',
+ 'Check membership using the in operator: if "rifle" in weapons:',
+ 'for loops iterate over sequences: for round in range(3):',
+ 'range(n) generates numbers from 0 up to n - 1.',
+ 'while loops repeat as long as a condition is True.',
+ 'Use break to exit a loop immediately, and continue to skip to the next iteration.',
+ 'enumerate(list) provides both index and item in loops.',
+ 'zip(list1, list2) combines corresponding elements from two lists.',
+ 'Define functions with def: def fire(weapon): return weapon.dmg',
+ 'Functions can take multiple parameters and return computed values.',
+ 'Provide default parameter values: def shield(boost=25):',
+ 'Variables inside functions are local unless declared global.',
+ 'List comprehensions build lists concisely: [x * 2 for x in nums].',
+ 'Filter with list comprehensions: [x for x in nums if x > 0].',
+ 'Lambda functions are short, anonymous functions: square = lambda x: x ** 2.',
+ 'Sort lists with sorted() or list.sort(key=lambda x: x[1]).',
+ 'f-strings format expressions inside strings: f"Ammo left: {ammo}".',
+ 'Handle errors cleanly using try and except blocks.',
+ 'The finally block runs whether an exception occurred or not.',
+ 'String methods: .upper(), .lower(), .strip(), and .replace().',
+ 'Join lists into strings with "".join(items).',
+ 'The math module offers sqrt(), ceil(), floor(), and pi.',
+ 'Define classes using class: class Soldier: def __init__(self, hp): self.hp = hp.',
+ 'self refers to the instance of the object being created or used.',
+ 'Add methods to classes to give objects behavior.',
+ 'Inherit class behavior: class Elite(Soldier):',
+ 'The json module parses and formats data: json.loads() and json.dumps().',
+ 'Dictionaries can be nested to model complex database structures.',
+ 'Use any() and all() to test collections of conditions.',
+ 'The re module allows powerful regular expression pattern matching.',
+ 'Combine all Python fundamentals against the final threat.',
+ 'THE COMMANDER: Overcome all three boss phases with code and combat!'
+];
+
+const BRIEF=[
+ 'Level 1: 5 recruits. Learn WASD movement, mouse aiming, and auto-reloading.',
+ 'Level 2: 8 soldiers with fast runners. Manage distance and corner angles.',
+ 'Level 3: 12 soldiers including ranged shooters. Use cover obstacles.',
+ 'Level 4: 16 soldiers with heavies. Conserve ammunition and stay alert.',
+ 'Level 5: 20 soldiers. DISAPPEAR ability unlocked (press X / GHOST button).',
+ 'Level 6: 24 soldiers. Practice fading into shadows to reset engagement.',
+ 'Level 7: 28 mixed wave soldiers. Plant time bombs on obstacles (V / PLANT).',
+ 'Level 8: 32 soldiers. Use cover and coordinated explosives.',
+ 'Level 9: 36 soldiers. Heavies and shooters coordinate from range.',
+ 'Level 10: 40 soldiers. Final test of recruit sector. Prepare for coding challenges.',
+ 'Level 11: 44 soldiers. Coding challenges begin! String manipulation required.',
+ 'Level 12: 48 soldiers. Night siege in progress. Keep moving and fire accurately.',
+ 'Level 13: 52 soldiers. Crimson wave approaching. Plant time bombs strategically.',
+ 'Level 14: 56 soldiers. High pressure from elite strafers.',
+ 'Level 15: 60 soldiers. Deep combat in the dead zone. Ammo drops are scarce.',
+ 'Level 16: 62 soldiers. Coordinated elite rifle squads.',
+ 'Level 17: 64 soldiers. Narrow corridors, heavy armor.',
+ 'Level 18: 66 soldiers. Iron fortress security grid.',
+ 'Level 19: 68 soldiers. Approaching outer perimeter.',
+ 'Level 20: 70 soldiers. Shadow spire ascent. Fast runners lead the charge.',
+ 'Level 21: 72 soldiers. Cyber ingress sector breached.',
+ 'Level 22: 74 soldiers. High-speed vector shifting enemies.',
+ 'Level 23: 76 soldiers. Quantum breach detected. Watch flank angles.',
+ 'Level 24: 78 soldiers. Neural grid defenders on high alert.',
+ 'Level 25: 80 soldiers. Overclocked hostile combat AI.',
+ 'Level 26: 82 soldiers. Narrow canyon crossfire.',
+ 'Level 27: 84 soldiers. Firewall siege line.',
+ 'Level 28: 86 soldiers. Sub-zero storage vault. Heavies incoming.',
+ 'Level 29: 88 soldiers. Rapid synapse counter-offensive.',
+ 'Level 30: 90 soldiers. Citadel gate perimeter breach.',
+ 'Level 31: 92 soldiers. Titan core security detail.',
+ 'Level 32: 94 soldiers. Omega protocol countermeasures active.',
+ 'Level 33: 96 soldiers. Zero day defense grid.',
+ 'Level 34: 98 soldiers. Relentless data storm waves.',
+ 'Level 35: 100 soldiers. Mainframe lock engaged.',
+ 'Level 36: 102 soldiers. Spectre assault division.',
+ 'Level 37: 104 soldiers. Void engine power conduit.',
+ 'Level 38: 106 soldiers. Apex hunters in pursuit.',
+ 'Level 39: 108 soldiers. Terminal shadow corridor.',
+ 'Level 40: 110 soldiers. Dark horizon frontline.',
+ 'Level 41: 112 soldiers. System purge initiated.',
+ 'Level 42: 114 soldiers. Redline combat pressure.',
+ 'Level 43: 116 soldiers. Eclipse assault grid.',
+ 'Level 44: 118 soldiers. Iron cloud heavy artillery.',
+ 'Level 45: 120 soldiers. Vortex breach checkpoint.',
+ 'Level 46: 122 soldiers. Cyber hell division.',
+ 'Level 47: 124 soldiers. Command sanctuary entrance.',
+ 'Level 48: 126 soldiers. Sanctum final guards.',
+ 'Level 49: 128 soldiers. War council supreme defense squad.',
+ 'Level 50: THE COMMANDER. 3 phases, invulnerable shield breakable only by Python!'
+];
