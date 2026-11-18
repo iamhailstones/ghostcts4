@@ -1,7 +1,8 @@
 "use strict";
 /* levels.js - configuration: balance values, enemy types, 50-level table, obstacles */
 /* ---------- CONFIG (edit to rebalance) ---------- */
-const CFG={hp:100,mag:30,reserve:48,bombs:5,maxBombs:9,speed:230,fuse:.8,blastR:115,blastDmg:100,dmg:15,fireRate:.22,reload:1.2};
+const LEVELS_TOTAL=50;   /* the campaign is exactly 50 levels; THE COMMANDER is level 50 */
+const CFG={hp:100,mag:60,reserve:48,bombs:10,maxBombs:10,speed:230,fuse:.8,blastR:115,blastDmg:100,dmg:15,fireRate:.22,reload:1.2};
 const TYPES={
  grunt:{hp:30,sp:70,dmg:8,r:12,col:'#ff5a5a',pts:10},
  runner:{hp:20,sp:150,dmg:6,r:10,col:'#ffd93d',pts:15},
@@ -145,3 +146,5 @@ const BRIEF=[
  'Level 49: 128 soldiers. War council supreme defense squad.',
  'Level 50: THE COMMANDER. 3 phases, invulnerable shield breakable only by Python!'
 ];
+/* integrity guard: every level table must hold exactly LEVELS_TOTAL entries (the offline test in tests/verify.js checks this too) */
+(function(){const t={LV,COUNT,POOL,TIPS,BRIEF},bad=Object.keys(t).filter(k=>t[k].length!==LEVELS_TOTAL);if(bad.length&&typeof console!=='undefined')console.error('GHOST: these level tables must have exactly '+LEVELS_TOTAL+' entries: '+bad.map(k=>k+'='+t[k].length).join(', '))})();

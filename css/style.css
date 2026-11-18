@@ -40,7 +40,7 @@ h1{animation:glow 2.4s ease-in-out infinite alternate}
 #touch .js i{position:absolute;left:36px;top:36px;width:48px;height:48px;border-radius:50%;background:rgba(255,110,120,.5)}
 #touch button{position:absolute;pointer-events:auto;touch-action:none;width:58px;height:58px;border-radius:50%;padding:0;font-size:12px}
 #tb{background:#2a1215;border:2px solid #ff4444;color:#fff;font-weight:bold}
-#tp{background:#2a2210;border:2px solid #ffd54f;color:#ffd54f;font-weight:bold;font-size:11px}
+#tp{background:#0a0a0c;border:2px solid #e0202f;color:#ff4a56;font-weight:bold;font-size:11px}
 #td{background:#121c2a;border:2px solid #6fd3ff;color:#6fd3ff;font-weight:bold;font-size:11px}
 #td.on{background:#6fd3ff;color:#000;box-shadow:0 0 14px #6fd3ff}
 @media(max-width:700px){#hud{font-size:11px;gap:2px 10px}#foot{display:none}}
@@ -287,3 +287,41 @@ body.fem #foot{color:#ffb8dc}
 #cin{font:15px/1.6 "Courier New",monospace;white-space:pre;overflow-y:auto!important;overflow-x:auto;tab-size:4;caret-color:#39ff7a;color:#b6ffd0;letter-spacing:.2px;height:clamp(110px,28vh,240px);width:min(660px,94%);resize:none}
 @media (pointer:coarse){#chal{overflow:hidden!important;gap:4px;padding:6px 10px}#cinfo{flex:0 1 auto;max-height:35%;overflow:hidden}#cin{font-size:15px;flex:1 1 110px;min-height:90px;height:auto!important;overflow-y:auto!important;width:min(900px,100%)}#cfb{max-height:18%;overflow:hidden;font-size:13px}#chal>div:last-child{flex:none}}
 #gsel .row{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start}@media (pointer:coarse){.gch svg{width:64px;height:96px}}
+
+/* ===== level gate screen: every option and button must be reachable on a phone ===== */
+#chal.mcq{overflow-y:auto!important;justify-content:flex-start!important;-webkit-overflow-scrolling:touch}
+#chal.mcq #cinfo,#chal.mcq #cfb{max-height:none!important;overflow:visible!important}
+#chal.mcq #copts{display:grid;grid-template-columns:1fr;gap:8px;width:min(900px,96%);margin:6px auto}
+#chal.mcq>div:last-child{position:sticky;bottom:0;z-index:3;background:rgba(5,0,2,.94);padding:6px 0;margin-top:auto}
+#chal.mcq #copts button:disabled{opacity:.7}
+@media (max-height:520px){
+ #chal.mcq #copts{grid-template-columns:1fr 1fr;gap:6px;margin:4px auto}
+ #chal.mcq #copts button{min-height:34px;padding:5px 9px;font-size:13px}
+ #chal.mcq #ct{font-size:15px;margin:2px 0}
+ #chal.mcq #cm,#chal.mcq #cl{font-size:11px;margin:0}
+ #chal.mcq #cb{font-size:14px;margin:2px 0}
+ #chal.mcq #cfb{font-size:12px}
+ #chal.mcq>div:last-child button{min-height:36px;padding:6px 12px;font-size:13px}
+}
+/* coding gates on touch screens: the task and the feedback scroll instead of being cut off */
+@media (pointer:coarse){#chal:not(.mcq) #cinfo{max-height:42%;overflow-y:auto}#chal:not(.mcq) #cfb{max-height:26%;overflow-y:auto}}
+/* disabled answer options (after a lock or a correct answer) must not react to hover/touch, so nothing looks like a hint */
+#chal button:disabled{pointer-events:none}
+/* short (landscape phone) screens: the editor is already pre-filled with the starter code, so the duplicate code box and the lesson line make room for the task text */
+@media (max-height:520px){
+ #chal:not(.mcq) #cc,#chal:not(.mcq) #cl,#chal:not(.mcq) #cguide{display:none!important}
+ #chal:not(.mcq) #cinfo{max-height:52%!important}
+ #chal:not(.mcq) #cb{font-size:13px;line-height:1.3}
+ #chal:not(.mcq) #ct{font-size:16px;margin:2px 0}
+ #chal:not(.mcq) #cm{font-size:11px;margin:0}
+}
+/* HOW TO PLAY on short (landscape phone) screens: compact, and BACK / NEXT stay pinned and reachable whatever the text length */
+@media (max-height:520px){
+ #tut{padding:6px 12px}
+ #tut .tsol{display:none}
+ #tut .tinner{gap:5px;max-height:100%;overflow-y:auto}
+ #tut h2{font-size:17px;margin:0}
+ #tut #tutBody{font-size:13px;line-height:1.4}
+ #tut .row{position:sticky;bottom:0;width:100%;background:rgba(5,0,2,.94);padding:4px 0}
+ #tut .row button{min-height:34px;padding:6px 12px;font-size:13px}
+}

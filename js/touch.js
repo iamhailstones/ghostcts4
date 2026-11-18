@@ -67,7 +67,7 @@ const TouchUI={fire:false,aim:false,last:-1.57,power:AIM.minShotPower,auto:false
  box.innerHTML='<div class="js" id="jl" role="button" aria-label="Move"><i></i></div>'+
   '<div class="js" id="jr" role="button" aria-label="Fire: hold to shoot, drag to aim"><svg class="ficon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="14" fill="none" stroke="currentColor" stroke-width="3"/><path d="M24 3v12M24 33v12M3 24h12M33 24h12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="24" cy="24" r="3.2" fill="currentColor"/></svg><i></i></div>'+
   '<button id="tb" aria-label="Bomb">BOMB</button><button id="tp" aria-label="Plant Bomb">PLANT</button><button id="td" aria-label="Disappear">GHOST</button>'+
-  '<button id="ta" aria-label="Auto shoot: toggle">AUTO</button>';
+  '<button id="tsw" aria-label="Switch gun">SW</button><button id="ta" aria-label="Auto shoot: toggle">AUTO</button>';
  $('wrap').appendChild(box);
  function bind(el,onMove,onEnd){let pid=null;const knob=el.querySelector('i');
   /* m = finger distance from the circle centre in pixels; ux/uy = unit direction of the drag */
@@ -92,5 +92,6 @@ const TouchUI={fire:false,aim:false,last:-1.57,power:AIM.minShotPower,auto:false
  const tap=(id,fn)=>{const el=$(id);if(el)el.addEventListener('pointerdown',e=>{e.preventDefault();if(state==='play')fn()})};
  tap('tb',throwBomb);tap('tp',plantBomb);tap('td',toggleGhost);
  tap('ta',()=>TouchUI.setAuto(!TouchUI.auto));
+ tap('tsw',()=>{if(ownedGuns().length<2)msg('ONLY ONE GUN - BUY MORE IN THE GUN MARKET (G)');else cycleGun()});   /* SW = switch gun, sits next to AUTO */
  box.addEventListener('selectstart',e=>e.preventDefault());
 })();

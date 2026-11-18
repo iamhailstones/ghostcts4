@@ -8,7 +8,7 @@ const show=id=>{['menu','pause','end','chal','market','cfm','chatp','tut','setti
    `levelScore` is the CURRENT LEVEL score (reset to 0 each time a level starts or is retried). All points go through addScore(). */
 function addScore(n){score+=n;levelScore+=n}
 function newLevel(n){
- const boss=n===50;levelScore=0;
+ const boss=n===LEVELS_TOTAL;levelScore=0;
  G={feed:[],decals:[],lvl:n,total:COUNT[n-1],spawned:0,wave:1,waves:boss?1:3,waveWait:0,spT:1,enemies:[],bul:[],eb:[],bombs:[],fx:[],pk:[],shake:0,shots:0,hits:0,combo:0,comboT:0,boss:null,
   p:{x:W/2,y:H-80,r:12,hp:CFG.hp,mag:CFG.mag,reserve:Math.max(36,CFG.reserve-Math.floor(1.5*(n-1))),bombs:Math.min(CFG.maxBombs,CFG.bombs),a:0,cd:0,rel:0,hurt:0,sh:0,sk:0}};initGuns();
  if(boss){const b=mk('grunt',W/2,90);Object.assign(b,{type:'boss',boss:1,r:36,hp:5000,max:5000,sp:65,dmg:18,pts:5000,t:{col:'#ff2e63'},ph:1,fire:1,sum:4,shield:false,shDone:false});G.enemies.push(b);G.boss=b}
@@ -39,6 +39,6 @@ function update(dt){const p=G.p;
  G.pk=G.pk.filter(k=>!k.got);
  if(G.spawned>=G.total&&!G.enemies.length&&state==='play'){levelDone()}}
 function levelDone(){state='end';sfx('win');Voice.event('win');Music.stinger('win');const acc=G.shots?Math.floor(G.hits/G.shots*200):0;addScore(100*G.lvl+acc);SAVE.credits+=60*G.lvl;syncGuns();
- SAVE.best=Math.max(SAVE.best,score);const boss=G.lvl===50;if(!boss)SAVE.lvl=Math.max(SAVE.lvl,G.lvl+1);store();
+ SAVE.best=Math.max(SAVE.best,score);const boss=G.lvl===LEVELS_TOTAL;if(!boss)Gate.set(G.lvl,1,0,false);else store();   /* the next level stays LOCKED until its gate is passed (Gate.pass raises SAVE.lvl) */
  if(boss)showVictoryEnding(score,kills);
- else showEnd('LEVEL COMPLETE','Score '+score+' | Accuracy bonus +'+acc+' | Python tip: '+TIPS[G.lvl-1],'NEXT LEVEL',()=>{const l=G.lvl;state='end';if(l<=10)startMCQ(l,1,()=>{state='end';newLevel(l+1)});else{const ci=CH.findIndex(c=>c.lvl===l);openCh(ci>=0?ci:(l-11)%CH.length,true,null,false,()=>{state='end';newLevel(l+1)})}})}
+ else showEnd('LEVEL COMPLETE','Score '+score+' | Accuracy bonus +'+acc+' | Python tip: '+TIPS[G.lvl-1],'NEXT LEVEL',()=>Gate.begin(G.lvl))}

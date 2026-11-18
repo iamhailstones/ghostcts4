@@ -38,11 +38,11 @@ const Layout={rs:1,U:1,inL:0,inR:0,sl:0,sr:0,st:0,touch:false,js:0,btn:0,gap:0,e
    /* if the screen changed shape mid-battle, everything slides with the obstacles so nothing ends up inside a block */
    if(typeof G!=='undefined'&&G&&G.p){const dx=ox-ox0,dy=oy-oy0;if(dx||dy)for(const k of['enemies','bul','eb','bombs','fx','pk','decals'])for(const o of(G[k]||[]))if(typeof o.x==='number'){o.x+=dx;o.y+=dy;if(o.px!==undefined){o.px+=dx;o.py+=dy}}
     const p=G.p;p.x=clamp(p.x+dx,p.r,W-p.r);p.y=clamp(p.y+dy,p.r,H-p.r)}}},
- /* positions of the touch controls (css px): joysticks in the bottom corners, GUN above the left one, R / BOMB / Q / SW fanned in an arc around FIRE, AUTO bottom centre.
+ /* positions of the touch controls (css px): joysticks in the bottom corners, the row  SW - AUTO  directly above the left (move) circle, BOMB / PLANT / GHOST fanned in an arc around FIRE.
     Everything is derived from the screen size and the notch, with a gap between buttons wider than a fingertip, so nothing overlaps on any phone or tablet. */
  place(sf){if(!this.touch)return;const js=this.js,btn=this.btn,gap=this.gap,eL=this.edge+sf.l,eR=this.edge+sf.r,eB=Math.max(this.edge,sf.b+6),S=(id,o)=>{const e=document.getElementById(id);if(!e)return;e.style.left=e.style.right=e.style.bottom='auto';for(const k in o)e.style[k]=Math.round(o[k])+'px'};
   S('jl',{left:eL,bottom:eB});S('jr',{right:eR,bottom:eB});
-  S('tg',{left:eL+(js-btn)/2,bottom:eB+js+gap});S('ta',{left:eL+(js-btn)/2+btn+gap,bottom:eB+js+gap});
+  S('tsw',{left:eL+(js-btn)/2,bottom:eB+js+gap});S('ta',{left:eL+(js-btn)/2+btn+gap,bottom:eB+js+gap});
   const cx=eR+js/2,cy=eB+js/2,rr=js/2+btn/2+gap,step=2*Math.asin(Math.min(1,(btn+gap)/(2*rr))),lo=Math.asin(Math.max(-1,Math.min(1,(4+btn/2-cy)/rr)));let th=Math.max(lo,-.45);
   this.ext=0;['tb','tp','td'].forEach(id=>{const rx=cx+rr*Math.cos(th)-btn/2;S(id,{right:rx,bottom:cy+rr*Math.sin(th)-btn/2});if(cy+rr*Math.sin(th)-btn/2<110)this.ext=Math.max(this.ext,rx+btn);th+=step*1.35});
     document.documentElement.style.setProperty('--rlb',(eB+btn+gap+4)+'px')},

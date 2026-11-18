@@ -18,7 +18,10 @@ function updSnd(){const b=$('sndb'),c=$('musb');if(b)b.textContent='SOUND: '+(SA
 function toggleMute(){SAVE.mute=!SAVE.mute;store();updSnd();if(SAVE.mute&&typeof Voice!=='undefined')Voice.cancel();msg(SAVE.mute?'SOUND OFF':'SOUND ON')}
 function toggleMusic(){SAVE.nomusic=!SAVE.nomusic;store();updSnd();msg(SAVE.nomusic?'MUSIC OFF':'MUSIC ON')}
 const CHORDS=[[110,0,3,7],[98,0,4,7],[87.31,0,4,7],[82.41,0,4,7]];   // Am - G - F - E: dark, emotional, never fully resolved
-const FEM_CHORDS=[[146.83,0,3,7],[116.54,0,4,7],[130.81,0,4,7],[110.00,0,3,7]]; // Dm - Bb - C - Am: futuristic cyber synthwave
+const FEM_CHORDS=[[261.63,0,4,7,11],[196.00,0,4,7,14],[220.00,0,3,7,10],[174.61,0,4,7,11]];   // Cmaj7 - Gadd9 - Am7 - Fmaj7: soft, warm, open
+/* the tune: 8 bars x [step, semitones above C5]; every note sits inside the chord of its bar */
+const FEM_MEL=[[[0,4],[4,7],[6,9],[8,7],[12,4]],[[0,2],[4,4],[8,7]],[[0,2],[4,7],[8,11],[10,9],[12,7]],[[0,4],[4,2],[8,-1],[12,2]],
+ [[0,0],[4,4],[8,9]],[[0,7],[4,4],[8,0],[12,4]],[[0,5],[4,9],[8,12],[12,9]],[[0,7],[4,5],[8,4],[12,2]]];
 const Music={on:false,step:0,nextT:0,bpm:66,mood:'menu',danger:false,hold:0,duck:1,master:null,fx:null,timer:0,
  start(){if(this.on)return;try{const a=acx();
    if(!this.master){this.master=a.createGain();this.master.gain.value=0;this.master.connect(bus().m);
@@ -33,7 +36,7 @@ const Music={on:false,step:0,nextT:0,bpm:66,mood:'menu',danger:false,hold:0,duck
   this.danger=!!(g&&g.p&&state==='play'&&g.p.hp<=30);
   const lv=g?g.lvl:1;
   if(SAVE.gender==='f'){
-   this.bpm=this.mood==='boss'?146:this.mood==='play'?128+Math.min(18,lv>>1):this.mood==='boot'?116:this.mood==='hold'?100:120;
+   this.bpm=this.mood==='boss'?126:this.mood==='play'?100+Math.min(10,lv>>2):this.mood==='boot'?88:this.mood==='hold'?80:84;   /* unhurried and gentle */
   }else{
    this.bpm=SAVE.mstyle==='cinema'?(this.mood==='boss'?92:this.mood==='play'?72+lv:(this.mood==='boot'||this.mood==='hold')?62:66):(this.mood==='boss'?152:this.mood==='play'?138+lv:this.mood==='boot'?120:this.mood==='hold'?100:this.mood==='duck'?130:138);
   }},
@@ -43,30 +46,25 @@ const Music={on:false,step:0,nextT:0,bpm:66,mood:'menu',danger:false,hold:0,duck
   if(this.nextT<a.currentTime)this.nextT=a.currentTime+.05;
   while(this.nextT<a.currentTime+.35){this.beat(this.step,this.nextT);this.nextT+=60/this.bpm/4;this.step=(this.step+1)%128}},
  beat(s,t){if(SAVE.gender==='f')return this.beatFemale(s,t);return SAVE.mstyle==='cinema'?this.beatCinema(s,t):this.beatStreet(s,t)},
- /* Female Mode original soundtrack: high-tech cyberpunk electronic synthesizer soundscape with pulsing neon arpeggios, laser claps and crisp sub-bass */
- beatFemale(s,t){const bar=s>>4,i=s&15,m=this.mood,ch=FEM_CHORDS[(bar>>1)&3],r=ch[0],hi=m==='play'||m==='boss'||m==='hold',boss=m==='boss',wild=this.danger||boss;
-  // Electronic cyber kicks & metallic snares
-  if(m!=='boot'){
-   if(i===0||i===8||(i===14&&bar%2===1)||(boss&&i===4))this.kick(t,.58);
-   if(i===4||i===12)this.noise(t,2400,'bandpass',.32,.11);
-   if(i===0||i===8)this.bass808(r,t,.38,.32);
-   if(i===6||i===14)this.bass808(r*1.334,t,.28,.24);
+ /* Female Mode soundtrack: a soft, dreamy pop-ballad in C major. Music-box and celesta bells carry the tune, a plucked harp arpeggiates underneath,
+    a warm pad breathes under everything, and light percussion (soft kick, brush clap, shaker) only joins in during action. Original, synthesized. */
+ beatFemale(s,t){const bar=s>>4,i=s&15,m=this.mood,ch=FEM_CHORDS[(bar>>1)&3],r=ch[0],bl=60/this.bpm,f=k=>r*Math.pow(2,ch[1+k]/12),
+   play=m==='play',boss=m==='boss',act=play||boss,soft=!act;
+  if(!(bar&1)&&i===0)for(let k=0;k<4;k++){this.tone(f(k)*2,t,bl*8,'sine',.02,1500,1.6);this.tone(f(k)*2.006,t,bl*8,'triangle',.011,1100,2)}   // warm pad, a new chord every 2 bars
+  if(i===0||(act&&i===8)||(boss&&i===12))this.tone(r/2,t,bl*1.7,'sine',.1,240,.012,true);                                                    // soft round bass
+  if(i%2===0&&(act||i%4===0))this.harp(f([0,1,2,3,2,1,2,1][(i>>1)&7]),t,act?.04:.034);                                                       // harp arpeggio
+  for(const[st,semi]of FEM_MEL[bar])if(st===i&&m!=='duck')this.bell(523.25*Math.pow(2,semi/12),t,boss?.07:act?.052:.075,act?1.5:2.2);          // the tune
+  if(boss&&i%4===2)this.bell(1046.5*Math.pow(2,FEM_MEL[bar][0][1]/12),t,.03,1.2);                                                           // extra sparkle in boss fights
+  if(i===14&&(bar&1))this.bell(f(3)*4,t,.028,2);                                                                                           // little shimmer at the end of a phrase
+  if(act){
+   if(i===0||i===8||(boss&&(i===6||i===12)))this.kick(t,boss?.38:.28);                                                                       // gentle kick
+   if(i===4||i===12)this.noise(t,3000,'bandpass',boss?.15:.1,.1);                                                                           // brush clap
+   if(i%2===0)this.noise(t,7800,'highpass',i%4===0?.04:.026,.04);                                                                           // shaker
   }
-  // High-frequency cyber hi-hats with 16th rolling accents
-  if(i%2===0)this.noise(t,9400,'highpass',i%4===0?.06:.035,.03);
-  if((hi||wild)&&(i%2===1))this.noise(t,10200,'highpass',.03,.02);
-  // Pulsing melodic cyber arpeggiator (distinct crystalline timbre)
-  const arp=[0,3,7,12,7,3,12,15,0,7,12,15,12,7,3,0][i];
-  const arpF=r*2*Math.pow(2,(ch[1]+arp)/12);
-  this.tone(arpF,t,.12,'sawtooth',hi?.024:.018,2200,.003);
-  // Glassy synth lead chords on bar steps
-  if(i===0||i===8){
-   this.tone(r*4*Math.pow(2,ch[1]/12),t,.35,'triangle',.028,1600,.01);
-   this.tone(r*4*Math.pow(2,ch[3]/12),t,.35,'sine',.022,2400,.01);
-  }
-  if(wild&&i===2)this.tone(r*6*1.414,t,.16,'square',.018,2800,.002);
-  if(this.danger&&i===10)this.thump(t,.22);
- },
+  if(this.danger&&i%8===0)this.thump(t,.15)},                                                                                                // soft heartbeat when health is low
+ bell(f,t,v,d){const a=AC;d=d||1.6;[[1,1,'sine'],[2,.26,'sine'],[3.01,.09,'sine'],[5.2,.035,'triangle']].forEach(([h,gn,ty])=>{const o=a.createOscillator(),e=a.createGain();o.type=ty;o.frequency.value=f*h;
+   e.gain.setValueAtTime(.0001,t);e.gain.linearRampToValueAtTime(v*gn,t+.005);e.gain.exponentialRampToValueAtTime(.0001,t+d/(h>2?2.2:1));o.connect(e);e.connect(this.fx);o.start(t);o.stop(t+d+.05)})},
+ harp(f,t,v){this.tone(f,t,1.1,'triangle',v,3800,.004);this.tone(f*2,t,.55,'sine',v*.35,5200,.003)},
  beatCinema(s,t){const bar=s>>4,i=s&15,ch=CHORDS[(bar>>1)&3],r=ch[0],m=this.mood,bl=60/this.bpm,two=!(bar&1)&&i===0,rich=m==='menu'||m==='boot'||m==='hold',pl=m==='play'||m==='boss',f=k=>r*Math.pow(2,ch[1+k]/12);
   if(two){this.tone(r/2,t,bl*8,'sawtooth',.1,160,2.5);                                         // deep drone
    if((rich&&m!=='hold')||this.danger)[0,1,2].forEach(k=>{this.tone(f(k)*2,t,bl*8,'sawtooth',rich?.022:.014,800,1.8);this.tone(f(k)*2*1.004,t,bl*8,'sawtooth',rich?.016:.01,800,2.2)});   // slow strings
@@ -95,11 +93,12 @@ const Music={on:false,step:0,nextT:0,bpm:66,mood:'menu',danger:false,hold:0,duck
  stinger(kind){if(!this.on||SAVE.mute||SAVE.nomusic)return;const t=AC.currentTime+.06;
   if(SAVE.gender==='f'){
    if(kind==='win'){
-    [[293.66,0],[369.99,.15],[440,.3],[587.33,.48],[880,.7]].forEach(([f,d])=>{this.tone(f,t+d,1.6,'sine',.035,2800,.008);this.tone(f*2,t+d,1.2,'triangle',.015,3400,.005)});
+    [[523.25,0],[659.25,.14],[783.99,.28],[987.77,.42],[1046.5,.6],[1318.5,.82]].forEach(([f,d])=>this.bell(f,t+d,.07,2.4));
+    [261.63,329.63,392,493.88].forEach(f=>this.tone(f*2,t,4.5,'sine',.02,1500,.6));
     this.hold=t+5.5;
    }else{
-    [[349.23,0],[311.13,.6],[261.63,1.3],[174.61,2.2],[87.3,3.2]].forEach(([f,d])=>this.tone(f,t+d,2,'sawtooth',.025,800,.02));
-    this.noise(t+2,600,'lowpass',.15,1.8);
+    [[587.33,0],[523.25,.55],[440,1.1],[392,1.75],[329.63,2.5]].forEach(([f,d])=>this.bell(f,t+d,.06,2.6));
+    [220,261.63,329.63].forEach(f=>this.tone(f,t,6,'sine',.018,900,.8));
     this.hold=t+7;
    }
    return;

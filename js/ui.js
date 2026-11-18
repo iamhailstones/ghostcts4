@@ -3,7 +3,7 @@
 /* ---------- UI ---------- */
 function showEnd(t,s,b,fn){$('et').textContent=t;if(typeof s==='string'&&s.includes('<'))$('es').innerHTML=s;else $('es').textContent=s;$('eb').textContent=b;$('eb').onclick=fn;show('end')}
 function toMenu(){state='menu';G=null;updSnd();$('pname').value=SAVE.name||'';$('saveinfo').textContent='Best score '+SAVE.best+' | Highest level '+SAVE.lvl+' | Total kills '+SAVE.kills+' | Challenges solved '+SAVE.done.length+'/'+CH.length;
- $('play').textContent=SAVE.lvl>1?'CONTINUE (LEVEL '+SAVE.lvl+')':'PLAY';show('menu')}
+ const pg=Gate.get();$('play').textContent=pg?(pg.replay?'REPLAY LEVEL '+pg.lvl+' (REQUIRED)':'CONTINUE (UNLOCK LEVEL '+(pg.lvl+1)+')'):SAVE.lvl>1?'CONTINUE (LEVEL '+SAVE.lvl+')':'PLAY';show('menu')}
 
 function showVictoryEnding(finalScore,finalKills){
  state='end';sfx('win');Voice.event('win');Music.stinger('win');
@@ -30,89 +30,92 @@ function showVictoryEnding(finalScore,finalKills){
  showEnd('★ CAMPAIGN VICTORY ★',vicHtml,'CONCLUDE CAMPAIGN (MAIN MENU)',toMenu);
 }
 
-function startMCQ(lvl,qNum,onComplete){
+/* ---------- LEVEL GATES ----------
+   Clearing a level (1-49) locks the next one behind a gate: levels 1-10 ask 3 Python questions, levels 11-49 one coding challenge.
+   The pending gate is kept in SAVE.gate, so reloading, closing the tab or going to the menu can never skip it.
+   Two wrong answers lock the question and the player MUST replay the level (phone and laptop use this same code). */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const NOPLAYER={hp:0,sh:0,mag:0,reserve:0,bombs:0};
+function clearGateUI(){['copts','chalReplay'].forEach(id=>{const e=$(id);if(e)e.remove()});$('cin').readOnly=false;$('csub').disabled=false;$('chint').disabled=false;$('chal').classList.remove('mcq')}
+const Gate={
+ get(){const g=SAVE.gate;return g&&g.lvl>=1&&g.lvl<LEVELS_TOTAL?g:null},
+ set(l,q,fails,replay){SAVE.gate={lvl:l,q:q||1,fails:fails||0,replay:!!replay};store()},
+ pass(l){SAVE.lvl=Math.max(SAVE.lvl,l+1);SAVE.gate=null;store();cur=null;clearGateUI();state='end';newLevel(l+1)},
+ replay(l){cur=null;clearGateUI();show(null);newLevel(l)},
+ begin(l){const g=Gate.get(),mine=g&&g.lvl===l;state='end';
+  if(l<=10)startMCQ(l,mine?g.q:1,()=>Gate.pass(l),mine?g.fails:0);
+  else{const ci=CH.findIndex(c=>c.lvl===l);if(ci<0){console.error('GHOST: no gate challenge for level '+l);Gate.pass(l);return}openCh(ci,true,null,false,()=>Gate.pass(l),mine?g.fails:0)}}
+};
+/* two wrong answers: nothing can be attempted any more, only REPLAY LEVEL is left (the button sits in the always-visible bottom row) */
+function lockForReplay(l){
+ cur.locked=true;$('cin').readOnly=true;$('csub').disabled=true;$('chint').disabled=true;
+ document.querySelectorAll('#copts button').forEach(b=>b.disabled=true);
+ const old=$('chalReplay');if(old)old.remove();
+ const rep=document.createElement('button');rep.id='chalReplay';rep.textContent='REPLAY LEVEL '+l;
+ rep.style.background='#ff3b4a';rep.style.color='#fff';rep.style.fontWeight='bold';rep.onclick=()=>Gate.replay(l);
+ $('chint').parentNode.appendChild(rep)}
+
+function startMCQ(lvl,qNum,onComplete,fails0){
  if(state==='chal'&&cur&&cur.mcq&&cur.qNum===qNum)return;
- prev=state;state='chal';
- const qItem=MCQ.find(m=>m.lvl===lvl&&m.qNum===qNum)||MCQ[0];
- cur={mcq:true,lvl,qNum,qItem,onComplete,fails:0,attempted:false,done:false};
+ const qItem=MCQ.find(m=>m.lvl===lvl&&m.qNum===qNum);
+ if(!qItem){console.error('GHOST: missing gate question level '+lvl+' #'+qNum);onComplete();return}
+ prev=state;state='chal';const f0=fails0|0;
+ cur={mcq:true,gate:true,lvl,qNum,qItem,fails:f0,attempted:f0>0,done:false,locked:false};
+ clearGateUI();$('chal').classList.add('mcq');
  $('cnext').style.display='none';$('cmenu').style.display='none';$('cclose').style.display='none';
  $('cin').style.display='none';$('csub').style.display='none';$('cc').style.display='none';
  Voice.event('lesson');
  $('ct').textContent='LEVEL '+lvl+' GATE - QUESTION '+qNum+'/3: '+qItem.title;
  $('cm').textContent='CONCEPT: '+qItem.concept+'  |  QUESTION '+qNum+' OF 3 (REQUIRED TO PROCEED)';
- $('cl').textContent='Clearance requirement: Solve 3 Python questions to unlock Level '+(lvl+1)+'.';
- $('cb').textContent=qItem.q;
- $('cguide').textContent='';
- $('cfb').textContent='';
-
- const oldOpts=$('copts');if(oldOpts)oldOpts.remove();
- const repOld=$('chalReplay');if(repOld)repOld.remove();
-
+ $('cl').textContent='Solve 3 Python questions to unlock Level '+(lvl+1)+'. Two wrong answers = replay the level.';
+ $('cb').textContent=qItem.q;$('cguide').textContent='';$('cfb').textContent='';
  const d=document.createElement('div');d.id='copts';
  qItem.opts.forEach((optText,idx)=>{
-  const b=document.createElement('button');
-  b.innerHTML='<b style="color:#39ff7a">'+'ABCD'[idx]+')</b>  '+optText;
+  const b=document.createElement('button'),k=document.createElement('b'),L='ABCD'[idx];
+  k.style.color='#39ff7a';k.textContent=L+')';b.appendChild(k);b.appendChild(document.createTextNode('  '+optText));   /* text nodes: options like <class 'str'> must not be parsed as HTML */
   b.onclick=()=>{
-   if(!cur||cur.done)return;
-   cur.attempted=true;
+   if(!cur||cur.done||cur.locked||b.disabled)return;cur.attempted=true;
    if(idx===qItem.a){
     cur.done=true;sfx('ok');Voice.event('solved');
-    Array.from(d.querySelectorAll('button')).forEach(btn=>btn.disabled=true);
-    b.style.borderColor='#39ff7a';b.style.background='rgba(57,255,122,0.18)';
-    const rOld=$('chalReplay');if(rOld)rOld.remove();
-    let exp='<div style="color:#39ff7a;font-weight:bold;margin-bottom:6px">ACCESS GRANTED — CORRECT!</div>'
-     +'<b>VERIFIED SOLUTION:</b> '+qItem.sol+'\n\n'
-     +'<b>HOW IT WORKS:</b> '+qItem.why;
-    if(qNum<3)exp+='\n\n<span style="color:#6fd3ff">Protocol '+qNum+'/3 cleared. Proceed to next question.</span>';
-    else exp+='\n\n<span style="color:#39ff7a;font-weight:bold">ALL 3 PROTOCOLS VERIFIED! LEVEL '+(lvl+1)+' CLEARANCE GRANTED.</span>';
+    d.querySelectorAll('button').forEach(x=>x.disabled=true);b.style.borderColor='#39ff7a';b.style.background='rgba(57,255,122,0.18)';
+    let exp='<div style="color:#39ff7a;font-weight:bold;margin-bottom:6px">ACCESS GRANTED — CORRECT!</div><b>VERIFIED SOLUTION:</b> '+esc(qItem.sol)+'\n\n<b>HOW IT WORKS:</b> '+esc(qItem.why);
+    exp+=qNum<3?'\n\n<span style="color:#6fd3ff">Protocol '+qNum+'/3 cleared.</span>':'\n\n<span style="color:#39ff7a;font-weight:bold">ALL 3 PROTOCOLS VERIFIED! LEVEL '+(lvl+1)+' CLEARANCE GRANTED.</span>';
     $('cfb').innerHTML=exp;
-    const contBtn=document.createElement('button');
-    contBtn.style.marginTop='10px';contBtn.style.padding='10px 18px';contBtn.style.background='#39ff7a';contBtn.style.color='#000';contBtn.style.fontWeight='bold';
-    if(qNum<3){
-     contBtn.textContent='PROCEED TO QUESTION '+(qNum+1)+' / 3';
-     contBtn.onclick=()=>{d.remove();startMCQ(lvl,qNum+1,onComplete)};
-    } else {
-     contBtn.textContent='ENTER LEVEL '+(lvl+1);
-     contBtn.onclick=()=>{d.remove();cur=null;show(null);onComplete()};
-    }
-    d.appendChild(contBtn);
-   } else {
-    cur.fails++;sfx('no');Voice.event('wrong');
-    b.style.borderColor='#ff3b4a';b.style.background='rgba(255,59,74,0.18)';
-    let msgText='ACCESS DENIED. Option ('+'ABCD'[idx]+') is incorrect.';
-    if(cur.fails>=1)msgText+='\n\nHINT: '+qItem.hint;
-    $('cfb').textContent=msgText;
-    if(cur.fails>=2&&!$('chalReplay')){
-     const rep=document.createElement('button');rep.id='chalReplay';
-     rep.textContent='REPLAY LEVEL '+lvl;
-     rep.style.marginTop='10px';rep.style.background='#ff3b4a';rep.style.color='#fff';rep.style.fontWeight='bold';
-     rep.onclick=()=>{d.remove();cur=null;show(null);newLevel(lvl)};
-     d.appendChild(rep);
+    if(qNum<3){Gate.set(lvl,qNum+1,0,false);cur.after=()=>startMCQ(lvl,qNum+1,onComplete,0)}
+    else cur.after=()=>{cur=null;clearGateUI();show(null);onComplete()};
+    $('cclose').style.display='';$('cclose').textContent=qNum<3?'NEXT QUESTION '+(qNum+1)+'/3':'ENTER LEVEL '+(lvl+1);
+   }else{
+    cur.fails++;sfx('no');Voice.event('wrong');b.disabled=true;b.style.borderColor='#ff3b4a';b.style.background='rgba(255,59,74,0.18)';
+    if(cur.fails>=2){
+     Gate.set(lvl,1,0,true);
+     $('cfb').textContent='ACCESS DENIED. Option ('+L+') is incorrect.\n\nTWO WRONG ANSWERS - GATE LOCKED. You must REPLAY LEVEL '+lvl+' before you can try again.';
+     lockForReplay(lvl);
+    }else{
+     Gate.set(lvl,qNum,cur.fails,false);
+     $('cfb').textContent='ACCESS DENIED. Option ('+L+') is incorrect. ONE attempt left.\n\nHINT: '+qItem.hint;
     }
    }
   };
   d.appendChild(b);
  });
- $('cinfo').appendChild(d);
- show('chal');
+ $('chal').insertBefore(d,$('cin'));show('chal');
 }
 
-function openCh(i,req,win,train,gate){
- if(state==='chal')return;prev=state;state='chal';const c=CH[i];
- cur={i,req,win,train,gate,done:false,fails:0,attempted:false};
- const oldOpts=$('copts');if(oldOpts)oldOpts.remove();
- const repOld=$('chalReplay');if(repOld)repOld.remove();
+function openCh(i,req,win,train,gate,fails0){
+ if(state==='chal')return;prev=state;state='chal';const c=CH[i],f0=fails0|0;
+ cur={i,req,win,train,gate,lvl:c.lvl,done:false,fails:f0,attempted:f0>0,locked:false};
+ clearGateUI();
  $('cin').style.display='';$('csub').style.display='';
  $('cnext').style.display=gate?'none':'';$('cmenu').style.display=gate?'none':'';Voice.event('lesson');
  $('cguide').textContent=SAVE.done.length<2?'How to: 1) read the task  2) type your Python code  3) press RUN CHECK. Stuck? Press HINT after an attempt.':'';
  $('ct').textContent=c.title;$('cl').textContent=c.lesson||'';$('cm').textContent='CONCEPT: '+c.concept+'  |  DIFFICULTY: '+(c.diff||'INTERMEDIATE');
  $('cc').textContent=c.code||'# write your code below';$('cc').style.display=c.code?'':'none';
- $('cb').textContent=c.brief;$('cin').value=c.code||'';$('cfb').textContent='';$('csub').disabled=false;
+ $('cb').textContent=c.brief;$('cin').value=c.code||'';$('cfb').textContent='';
  $('cclose').textContent='BACK';$('cclose').style.display=req?'none':'';show('chal');$('cin').focus();
 }
 
 $('csub').onclick=()=>{
- if(!cur||cur.mcq)return;const c=CH[cur.i];const val=$('cin').value;cur.attempted=true;
+ if(!cur||cur.mcq||cur.locked)return;const c=CH[cur.i];const val=$('cin').value;cur.attempted=true;
  const synErr=pyStrict(val)||pySyntax(val);const nVal=norm(val);
  let isCorrect=false;
  if(!synErr){
@@ -123,14 +126,14 @@ $('csub').onclick=()=>{
   cur.done=true;sfx('ok');Voice.event('solved');$('csub').disabled=true;
   const repOld=$('chalReplay');if(repOld)repOld.remove();
   let r='';
-  if(cur.gate&&G){r=c.win(G.p);if(!SAVE.done.includes(c.id))SAVE.done.push(c.id);store()}
+  if(cur.gate){try{r=c.win(G?G.p:NOPLAYER)}catch(e){r=''}if(!SAVE.done.includes(c.id))SAVE.done.push(c.id);store()}
   else if(prev==='play'&&G){r=c.win(G.p);if(!SAVE.done.includes(c.id))SAVE.done.push(c.id);addScore(50);store()}
-  let succHtml='<div style="color:#39ff7a;font-weight:bold;margin-bottom:6px">ACCESS GRANTED.</div>'
-   +'<b>VERIFIED SOLUTION:</b>\n<pre style="margin:4px 0;color:#39ff7a;font-size:13px">'+c.sol+'</pre>\n'
-   +'<b>HOW IT WORKS:</b>\n'+c.why+(r?'\n\n<b style="color:#ffd700">REWARD: '+r+'</b>':'');
+  const succHtml='<div style="color:#39ff7a;font-weight:bold;margin-bottom:6px">ACCESS GRANTED.</div>'
+   +'<b>VERIFIED SOLUTION:</b>\n<pre style="margin:4px 0;color:#39ff7a;font-size:13px">'+esc(c.sol)+'</pre>\n'
+   +'<b>HOW IT WORKS:</b>\n'+esc(c.why)+(r?'\n\n<b style="color:#ffd700">REWARD: '+esc(r)+'</b>':'');
   $('cfb').innerHTML=succHtml;
   $('cclose').style.display='';$('cclose').textContent=cur.gate?'CONTINUE TO NEXT LEVEL':'CONTINUE';
- } else {
+ }else{
   sfx('no');Voice.event('wrong');cur.fails++;
   let errMsg='ACCESS DENIED.\n';
   if(synErr){errMsg+='EXACT CHECKER REQUIREMENT:\n'+synErr}
@@ -138,39 +141,39 @@ $('csub').onclick=()=>{
    const hintErr=pyHint(val);if(hintErr)errMsg+='SYNTAX REQUIREMENT: '+hintErr+'\n\n';
    errMsg+='CHECKER REQUIREMENT:\n'+(c.err||'Code must satisfy the Python challenge specification.');
   }
-  if(cur.fails>=1)errMsg+='\n\nHINT: '+c.hint;
-  $('cfb').textContent=errMsg;
-  if(cur.fails>=2&&!$('chalReplay')&&G&&G.lvl){
-   const rep=document.createElement('button');rep.id='chalReplay';
-   rep.textContent='REPLAY LEVEL '+G.lvl;
-   rep.style.marginTop='10px';rep.style.background='#ff3b4a';rep.style.color='#fff';rep.style.fontWeight='bold';
-   rep.onclick=()=>{cur=null;show(null);newLevel(G.lvl)};
-   const ctr=$('chal').querySelector('div:last-child');
-   if(ctr)ctr.appendChild(rep);
+  const forced=!!(cur.gate||cur.req),rl=cur.lvl||(G&&G.lvl);
+  if(forced&&cur.fails>=2&&rl){
+   if(cur.gate)Gate.set(rl,1,0,true);
+   $('cfb').textContent=errMsg+'\n\nTWO FAILED ATTEMPTS - LOCKED. You must REPLAY LEVEL '+rl+' before you can try again.';
+   lockForReplay(rl);
+  }else{
+   if(cur.gate)Gate.set(cur.lvl,1,cur.fails,false);
+   $('cfb').textContent=errMsg+'\n\nHINT: '+c.hint;
+   if(!forced&&cur.fails>=2&&!$('chalReplay')&&G&&G.lvl){   /* optional practice challenge: replay is offered, not forced */
+    const rep=document.createElement('button');rep.id='chalReplay';rep.textContent='REPLAY LEVEL '+G.lvl;
+    rep.style.background='#ff3b4a';rep.style.color='#fff';rep.style.fontWeight='bold';
+    rep.onclick=()=>{cur=null;clearGateUI();show(null);newLevel(G.lvl)};
+    $('chint').parentNode.appendChild(rep);
+   }
   }
  }
 };
 
 $('chint').onclick=()=>{
- if(!cur)return;
- if(!cur.attempted&&cur.fails===0){
-  $('cfb').textContent='Security Protocol: Make at least one attempt before unlocking hints.';
-  return;
- }
- const h=cur.mcq?cur.qItem.hint:CH[cur.i].hint;
- $('cfb').textContent='HINT: '+h;
+ if(!cur||cur.locked)return;
+ if(!cur.attempted&&cur.fails===0){$('cfb').textContent='Security Protocol: Make at least one attempt before unlocking hints.';return}
+ $('cfb').textContent='HINT: '+(cur.mcq?cur.qItem.hint:CH[cur.i].hint);
 };
 
 $('cclose').onclick=()=>{
  if(!cur)return;const c=cur;
- const repOld=$('chalReplay');if(repOld)repOld.remove();
- const optsOld=$('copts');if(optsOld)optsOld.remove();
- if(c.gate){if(!c.done)return;cur=null;show(null);c.gate();return}
- cur=null;
+ if(c.mcq){if(!c.done||!c.after)return;const a=c.after;a();return}
+ if(c.gate){if(!c.done)return;cur=null;clearGateUI();show(null);c.gate();return}
+ clearGateUI();cur=null;
  if(c.train){if(c.done&&c.i<CH.length-1){state='menu';openCh(c.i+1,false,null,true);return}state='menu';toMenu();return}
  state=prev==='play'?'play':prev;show(null);if(c.done&&c.win)c.win();if(state==='menu')toMenu();
 };
-$('play').onclick=()=>{if(document.activeElement)document.activeElement.blur();score=0;kills=0;newLevel(SAVE.lvl)};
+$('play').onclick=()=>{if(document.activeElement)document.activeElement.blur();score=0;kills=0;const pg=Gate.get();if(pg&&!pg.replay){G=null;Gate.begin(pg.lvl)}else newLevel(pg?pg.lvl:SAVE.lvl)};   /* a pending gate always comes first; after two fails the level itself must be replayed */
 $('pname').addEventListener('input',e=>{SAVE.name=e.target.value.replace(/[\u0000-\u001f<>]/g,'').slice(0,12);store()});
 $('pname').addEventListener('keydown',e=>{if(e.key==='Enter')e.target.blur()});
 $('sndb').onclick=toggleMute;

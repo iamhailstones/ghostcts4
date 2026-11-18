@@ -4,3 +4,4 @@
    Leave it '' to run fully offline (chat answers from built-in notes).
    NEVER put an API key here: keys live only in the backend's environment variables. */
 const GHOST_CONFIG={apiBase:'https://ghostcts4-backend.onrender.com'};
+const ASSISTANT_URL='https://ghostchatbox.onrender.com';   /* tapping the AI Assistant opens this site in a new tab */
